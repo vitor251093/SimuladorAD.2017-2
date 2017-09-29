@@ -41,7 +41,7 @@ Você deverá anexar comentários sobre a boa qualidade dos intervalos de confia
 
 ### 3. Estimativa de fase transiente (10 pontos)
 
-Nesta seção você descreverá como a fase transiente foi estimada para os diversos valores de  (obviamente existirá uma métrica mais crítica). A fase transiente deve sempre implicar num certo número de eventos de partida que são desprezados, esperando que o sistema entre em equilíbrio. Este número de partidas em cada cenário e para cada valor de utilização deve ser documentado, qualquer que seja o método escolhido para determinar o fim da fase transiente. 
+Nesta seção você descreverá como a fase transiente foi estimada para os diversos valores de p (obviamente existirá uma métrica mais crítica). A fase transiente deve sempre implicar num certo número de eventos de partida que são desprezados, esperando que o sistema entre em equilíbrio. Este número de partidas em cada cenário e para cada valor de utilização deve ser documentado, qualquer que seja o método escolhido para determinar o fim da fase transiente. 
 
 A determinação da fase transiente é obrigatória, pois é um exercício para determinar a entrada em equilíbrio do sistema. Você terá que justificar suas escolhas. Este é um processo empírico, mas as dicas na apostila ajudam. 
 
