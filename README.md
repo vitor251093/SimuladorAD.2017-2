@@ -79,6 +79,6 @@ O Grupo deve apresentar um executável funcionando na apresentação do trabalho
 
 O relatório completo deve ser entregue impresso (e não em mídia eletrônica). 
 
-Uma versão eletrônica do documento impresso deve ser disponibilizada, adicionalmente. O programa executável deverá ser enviado para aguiar@nce.ufrj.br. 
+Uma versão eletrônica do documento impresso deve ser disponibilizada, adicionalmente. O programa executável deverá ser enviado para aguiar at nce.ufrj.br. 
 
 Se o Grupo usar alguma linguagem específica, ele deve compilar o ambiente e apresentar um executável que rode sem necessidade de instalação especial, em Windows 10 ou Ubuntu. O programa será testado com alguns valores particulares para averiguar sua correção e integridade.
