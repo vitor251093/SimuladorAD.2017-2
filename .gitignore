@@ -106,3 +106,6 @@ simad/
 
 # mypy
 .mypy_cache/
+
+# PyCharm
+.idea/
