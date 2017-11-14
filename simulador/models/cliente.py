@@ -1,6 +1,7 @@
 class Cliente(object):
 
     def __init__(self):
+
         self.__id = None
 
         self.__tempoChegadaFila1 = 0.0
