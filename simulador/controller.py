@@ -1,4 +1,5 @@
 from models.cliente import *
+from models.fila import *
 from random import expovariate
 
 # Essa funcao eh soh um exemplo de como fazer para agendar as chegadas
@@ -11,7 +12,7 @@ def rodar():
     for i in xrange(numero_clientes):
         # Agenda proxima chegada
         # o intervalo da proxima chegada eh definido por expovariate
-        proxima_chegada = tempo_simulacao + expovariate(0.1)
+        proxima_chegada = tempo_simulacao + expovariate(lambd)
 
         # Cria cliente e adiciona num vetor de clientes
         c = Cliente()
