@@ -1,6 +1,9 @@
 class Cliente(object):
 
     def __init__(self):
+
+        self.__id = None
+
         self.__tempoChegadaFila1 = 0.0
         self.__tempoChegadaServico1 = 0.0
         self.__tempoTerminoServico1 = 0.0
@@ -13,6 +16,9 @@ class Cliente(object):
         self.__tempoDecorridoServico2 = 0.0
 
     ## Setters
+    def setID(self, id):
+        self.__id = id
+
     def setTempoChegadaFila1(self, tempo):
         self.__tempoChegadaFila1 = tempo
 
@@ -41,6 +47,9 @@ class Cliente(object):
         self.__tempoDecorridoServico2 = tempo
 
     ## Getters
+    def getID(self):
+        return self.__id
+
     def getTempoChegadaFila1(self):
         return self.__tempoChegadaFila1
 
