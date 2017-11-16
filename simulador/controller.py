@@ -34,3 +34,6 @@ def rodar():
 
 if __name__ == "__main__":
     rodar()
+
+if __name__ == "__main__":
+    rodar()
