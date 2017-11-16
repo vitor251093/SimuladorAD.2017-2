@@ -1,32 +1,25 @@
 from models.cliente import *
 from models.fila import *
+from models.simulacao import *
+from models.agendador import *
 from random import expovariate
 
-# Essa funcao eh soh um exemplo de como fazer para agendar as chegadas
+
 def rodar():
-    numero_clientes = 20
-    lista_de_clientes = []
+
     lambd = 0.1
-    tempo_simulacao = 0.0
+    tempo_de_servico = 1.0
 
-    for i in xrange(numero_clientes):
-        # Agenda proxima chegada
-        # o intervalo da proxima chegada eh definido por expovariate
-        proxima_chegada = tempo_simulacao + expovariate(lambd)
+    simulacao = Simulacao()
+    agendador = Agendador()
 
-        # Cria cliente e adiciona num vetor de clientes
-        c = Cliente()
-        c.setID(i)
-        c.setTempoChegadaFila1(proxima_chegada)
-        lista_de_clientes.append(c)
+    # Agendar primeira chegada
+    tempo_de_chegada = agendador.agendarChegadaFila1(simulacao.getTempo(), lambd)
+    c = Cliente()
+    c.setID(0)
+    c.setTempoChegadaFila1(tempo_de_chegada)
 
-        # Imprime pra ver como esta
-        print "Cliente %d chegou no instante: %f" % (c.getID(), c.getTempoChegadaFila1())
-
-        # Seta tempo de simulacao como tempo da chegada (a proxima chegada deve ocorrer apos)
-        tempo_simulacao = proxima_chegada
-
-
+    print c.getTempoChegadaFila1()
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ class Fila(object):
         pass
 
     # Entra com um cliente
-    def adicionarClienteAFila(self):
+    def adicionarClienteAFila(cliente):
         pass
 
     # Retorna o cliente no indice zero (ponteiro)
