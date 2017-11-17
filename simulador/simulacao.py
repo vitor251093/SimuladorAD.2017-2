@@ -17,7 +17,7 @@ class Simulacao(object):
         return self.tempoAtual() - self.__momentoDeInicio
 
     def timerDeCliente(self, funcaoTempo, funcaoExecucao, *args):
-        t = Timer(('cliente.%s' % (funcaoTempo)), 'from __main__ import cliente', funcaoExecucao(*args))
+        return Timer(('cliente.%s' % (funcaoTempo)), 'from __main__ import cliente', funcaoExecucao(*args))
 
     def clienteEntraNaFila(self, cliente):
         print "Cliente %d chegou na fila em: %f" % (cliente.getID(), self.tempoDeSimulacao())
