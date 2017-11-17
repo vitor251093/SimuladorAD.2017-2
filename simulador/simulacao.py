@@ -9,7 +9,6 @@ class Simulacao(object):
 
     def __init__(self):
         self.__momentoDeInicio = time.time()
-        self.__clienteDemonstracao = Cliente()
 
     def tempoAtual(self):
         return time.time()
@@ -17,12 +16,15 @@ class Simulacao(object):
     def tempoDeSimulacao(self):
         return self.tempoAtual() - self.__momentoDeInicio
 
-    def clienteEntraNaFila(self):
-        print "Cliente 1 chegou na fila em: %f" % (self.tempoDeSimulacao())
-        t = Timer('self.__clienteDemonstracao.getTempoServico1()', 'from __main__ import self', self.clienteChegaNoServico())
+    def clienteEntraNaFila(self, cliente):
+        print "Cliente %d chegou na fila em: %f" % (cliente.getID(), self.tempoDeSimulacao())
+        t = Timer('cliente.getTempoServico1()', 'from __main__ import cliente', self.clienteChegaNoServico(cliente))
         
-    def clienteChegaNoServico(self):
-        print "Cliente 1 partiu da fila em: %f" % (self.tempoDeSimulacao())
+    def clienteChegaNoServico(self, cliente):
+        print "Cliente %d partiu da fila em: %f" % (cliente.getID(), self.tempoDeSimulacao())
+
+    def clienteEntraNoSistema(self, cliente):
+        t = Timer('cliente.getTempoChegadaFila1()', 'from __main__ import cliente', self.clienteEntraNaFila(cliente))
 
     def run(self):
         lambd = 0.1
@@ -35,11 +37,12 @@ class Simulacao(object):
         tempo_de_chegada     = agendador.agendarChegadaFila1(self.tempoAtual(), lambd)
         tempo_de_atendimento = agendador.agendarAtendimentoFila1(self.tempoAtual(), tempo_de_servico)
         
-        self.__clienteDemonstracao.setID(0)
-        self.__clienteDemonstracao.setTempoChegadaFila1(tempo_de_chegada)
-        self.__clienteDemonstracao.setTempoServico1(tempo_de_atendimento)
+        clienteDemonstracao = Cliente()
+        clienteDemonstracao.setID(1)
+        clienteDemonstracao.setTempoChegadaFila1(tempo_de_chegada)
+        clienteDemonstracao.setTempoServico1(tempo_de_atendimento)
 
-        t = Timer('self.__clienteDemonstracao.getTempoChegadaFila1()', 'from __main__ import self', self.clienteEntraNaFila())
+        self.clienteEntraNoSistema(clienteDemonstracao)
 
 
 if __name__ == "__main__":
