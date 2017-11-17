@@ -36,7 +36,7 @@ class Cliente(object):
     def setTempoTerminoServico2(self, tempo):
         self.__tempoTerminoServico2 = tempo
 
-    def setTempoNCSerivico2(self, tempo):
+    def setTempoNCServico2(self, tempo):
         self.__tempoNCServico2 = tempo
 
     def setTempoDecorridoServico2(self, tempo):
@@ -67,7 +67,7 @@ class Cliente(object):
     def getTempoTerminoServico2(self):
         return self.__tempoTerminoServico2
 
-    def getTempoNCSerivico2(self):
+    def getTempoNCServico2(self):
         return self.__tempoNCServico2
 
     def getTempoDecorridoServico2(self):
