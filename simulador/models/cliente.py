@@ -53,7 +53,7 @@ class Cliente(object):
         return self.__tempoChegadaServico1
 
     def getTempoTerminoServico1(self):
-        return getTempoChegadaServico1() + getTempoServico1()
+        return self.getTempoChegadaServico1() + self.getTempoServico1()
 
     def getTempoServico1(self):
         return self.__tempoServico1
