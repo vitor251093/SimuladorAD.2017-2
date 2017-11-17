@@ -15,13 +15,12 @@ class Simulacao(object):
         return time.time()
 
     def tempoDeSimulacao(self):
-        return time.time() - self.__momentoDeInicio
+        return self.tempoAtual() - self.__momentoDeInicio
 
     def clienteEntraNaFila(self):
         print "Cliente 1 chegou na fila em: %f" % (self.tempoDeSimulacao())
         t = Timer('self.__clienteDemonstracao.getTempoServico1()', 'from __main__ import self', self.clienteChegaNoServico())
-        #t.start()
-
+        
     def clienteChegaNoServico(self):
         print "Cliente 1 partiu da fila em: %f" % (self.tempoDeSimulacao())
 
@@ -41,7 +40,6 @@ class Simulacao(object):
         self.__clienteDemonstracao.setTempoServico1(tempo_de_atendimento)
 
         t = Timer('self.__clienteDemonstracao.getTempoChegadaFila1()', 'from __main__ import self', self.clienteEntraNaFila())
-        #t.start()
 
 
 if __name__ == "__main__":
