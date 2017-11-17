@@ -1,14 +1,18 @@
 from cliente import *
+from timeit import Timer
 
 class Fila(object):
 
     def __init__(self, id):
         self.__id = id
         self.__clientes = []
+        self.__timer = None
 
     # Retorna cliente e remove do topo da array
     def retirarClienteEmAtendimento(self):
-        pass
+        cliente = self.__clientes[0]
+        self.__clientes.pop(0)
+        return cliente
 
     # Entra com um cliente
     def adicionarClienteAFila(self, cliente):
@@ -16,7 +20,11 @@ class Fila(object):
 
     # Retorna o cliente no indice zero (ponteiro)
     def clienteEmAtendimento(self):
-        return Cliente[0]
+        return self.__clientes[0]
+
+    # Numero de pessoas na fila
+    def numeroDePessoasNaFila(self):
+        return len(self.__clientes)
 
     # Getters
     def getID(self):
