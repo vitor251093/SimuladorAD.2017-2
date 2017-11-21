@@ -1,12 +1,12 @@
 class Cliente(object):
 
-    def __init__(self):
+    def __init__(self, id, tempoChegadaFila1, tempoChegadaServico1, tempoServico1):
 
-        self.__id = None
+        self.__id = id
 
-        self.__tempoChegadaFila1 = 0.0
-        self.__tempoChegadaServico1 = 0.0
-        self.__tempoServico1 = 0.0
+        self.__tempoChegadaFila1 = tempoChegadaFila1
+        self.__tempoChegadaServico1 = tempoChegadaServico1
+        self.__tempoServico1 = tempoServico1
 
         self.__tempoChegadaFila2 = 0.0
         self.__tempoChegadaServico2 = 0.0
@@ -18,14 +18,14 @@ class Cliente(object):
     def setID(self, id):
         self.__id = id
 
-    def setTempoChegadaFila1(self, tempo):
+    """def setTempoChegadaFila1(self, tempo):
         self.__tempoChegadaFila1 = tempo
 
     def setTempoChegadaServico1(self, tempo):
         self.__tempoChegadaServico1 = tempo
 
     def setTempoServico1(self, tempo):
-        self.__tempoServico1 = tempo
+        self.__tempoServico1 = tempo"""
 
     def setTempoChegadaFila2(self, tempo):
         self.__tempoChegadaFila2 = tempo
