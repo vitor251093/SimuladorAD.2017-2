@@ -22,7 +22,7 @@ class Simulacao(object):
         # Agendador que controla as chegadas
         agendador = Agendador()
 
-        while t < self.__tempo:
+        while id_cliente < 1000:
             if fila1.numeroDePessoasNaFila() == 0:
                 proxima_chegada = agendador.agendarChegadaFila1(t, self.__lambd)
                 inicio_de_servico = proxima_chegada
@@ -31,13 +31,8 @@ class Simulacao(object):
                 proxima_chegada = proxima_chegada + agendador.agendarChegadaFila1(t, self.__lambd)
                 inicio_de_servico = max(proxima_chegada, fila1.getCliente(-1).getTempoTerminoServico1())
 
-                if (proxima_chegada < fila1.getCliente(-1).getTempoTerminoServico1()):
-                    print "Cliente %d chega na fila em: %f ." % (id_cliente, proxima_chegada)
-                else:
-                    print "Cliente %d estava sendo atendido enquanto Cliente %d chegou em %f" % (fila1.getCliente(-1).getID(), id_cliente, proxima_chegada)
-                print "Cliente %d chega em: %f" % (id_cliente, proxima_chegada)
-
             cliente = Cliente(id_cliente, proxima_chegada, inicio_de_servico, self.__tempo_de_servico)
+            print "Cliente %d chega em: %f." % (id_cliente, cliente.getTempoChegadaFila1())
             fila1.adicionarClienteAFila(cliente)
             id_cliente+=1
             t = proxima_chegada
