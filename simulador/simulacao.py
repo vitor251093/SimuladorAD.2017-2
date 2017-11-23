@@ -2,17 +2,23 @@ from controllers.agendador import *
 from models.cliente import *
 from models.fila import *
 from random import expovariate
-from timeit import Timer
-import time
 
 class Simulacao(object):
 
     def __init__(self):
-        self.__momentoDeInicio = time.time()
+        self.__agendador = Agendador()
+        self.__lambd = 0.1
+
         self.__fila1 = Fila(1)
         #self.__fila2 = Fila(2)
-        self.__timerFila1 = None
-        #self.__timerFila2 = None
+        
+        self.__timerChegadaClienteFila1Indice = 0
+        self.__timerFimDeServicoClienteFila1Indice = 1
+        self.__timerFimDeServicoClienteFila2Indice = 2
+
+        self.__timerChegadaClienteFila1 = -1
+        self.__timerFimDeServicoClienteFila1 = -1
+        self.__timerFimDeServicoClienteFila2 = -1
 
     def tempoAtual(self):
         return time.time()
@@ -45,12 +51,59 @@ class Simulacao(object):
         self.timerDeCliente('getTempoChegadaFila1()', self.clienteEntraNaFila1, cliente)
 
 
+    def eventoDeDuracaoMinima(self):
+        timerValido1 = (self.__timerChegadaClienteFila1      != -1)
+        timerValido2 = (self.__timerFimDeServicoClienteFila1 != -1)
+        timerValido3 = (self.__timerFimDeServicoClienteFila2 != -1)
+
+        if timerValido1 == False and timerValido2 == False:
+            return self.__timerFimDeServicoClienteFila2Indice
+
+        if timerValido1 == False and timerValido3 == False:
+            return self.__timerFimDeServicoClienteFila1Indice
+
+        if timerValido2 == False and timerValido3 == False:
+            return self.__timerChegadaClienteFila1Indice
+
+        if timerValido1 == False:
+            return self.__timerFimDeServicoClienteFila1Indice if self.__timerFimDeServicoClienteFila1 <= self.__timerFimDeServicoClienteFila2 else self.__timerFimDeServicoClienteFila2Indice
+
+        if timerValido2 == False:
+            return self.__timerChegadaClienteFila1Indice if self.__timerChegadaClienteFila1 <= self.__timerFimDeServicoClienteFila2 else self.__timerFimDeServicoClienteFila2Indice
+
+        if timerValido3 == False:
+            return self.__timerChegadaClienteFila1Indice if self.__timerChegadaClienteFila1 <= self.__timerFimDeServicoClienteFila1 else self.__timerFimDeServicoClienteFila1Indice
+
+        lista = [self.__timerChegadaClienteFila1, self.__timerFimDeServicoClienteFila1, self.__timerFimDeServicoClienteFila2]
+        return lista.index(min(lista))
+
+    def executarProximoEvento(self):
+        proximoTimer = self.eventoDeDuracaoMinima()
+        if proximoTimer == self.__timerChegadaClienteFila1Indice:
+            self.__timerFimDeServicoClienteFila1 -= self.__timerChegadaClienteFila1
+            self.__timerFimDeServicoClienteFila2 -= self.__timerChegadaClienteFila1
+            self.__timerChegadaClienteFila1 = self.__agendador.agendarChegadaFila1(self.__lambd)
+
+
+        if proximoTimer == self.__timerFimDeServicoClienteFila1Indice:
+            self.__timerChegadaClienteFila1      -= self.__timerFimDeServicoClienteFila1
+            self.__timerFimDeServicoClienteFila2 -= self.__timerFimDeServicoClienteFila1
+            self.__timerFimDeServicoClienteFila1 = self.__agendador.agendarChegadaFila1(self.__lambd)
+            
+
+        if proximoTimer == self.__timerFimDeServicoClienteFila2Indice:
+            self.__timerChegadaClienteFila1      -= self.__timerFimDeServicoClienteFila2
+            self.__timerFimDeServicoClienteFila1 -= self.__timerFimDeServicoClienteFila2
+            self.__timerFimDeServicoClienteFila2 = self.__agendador.agendarChegadaFila1(self.__lambd)            
+
+        
+
     def run(self):
-        lambd = 0.1
+        """lambd = 0.1
         tempo_de_servico = 1.0
         numero_de_clientes = 99
 
-        agendador = Agendador()
+        
         
         tempo_de_chegada     = agendador.agendarChegadaFila1(self.tempoAtual(), lambd)
         tempo_de_atendimento = agendador.agendarAtendimentoFila1(self.tempoAtual(), tempo_de_servico)
@@ -60,7 +113,9 @@ class Simulacao(object):
         clienteDemonstracao.setTempoChegadaFila1(tempo_de_chegada)
         clienteDemonstracao.setTempoServico1(tempo_de_atendimento)
 
-        self.clienteEntraNoSistema(clienteDemonstracao)
+        self.clienteEntraNoSistema(clienteDemonstracao)"""
+
+
 
 
 if __name__ == "__main__":
