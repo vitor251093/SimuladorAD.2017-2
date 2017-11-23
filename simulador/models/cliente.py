@@ -1,10 +1,9 @@
 class Cliente(object):
 
-    def __init__(self):
+    def __init__(self, id, tempoChegadaNoSistema):
+        self.__id = id
 
-        self.__id = None
-
-        self.__tempoChegadaFila1 = 0.0
+        self.__tempoChegadaFila1 = tempoChegadaNoSistema
         self.__tempoChegadaServico1 = 0.0
         self.__tempoServico1 = 0.0
 

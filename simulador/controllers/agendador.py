@@ -8,5 +8,8 @@ class Agendador(object):
     def agendarChegadaFila1(self, lambd):
         return expovariate(lambd)
 
-    def agendarAtendimentoFila1(self, tempo_de_simulacao, tempo_de_servico):
-        return tempo_de_simulacao + tempo_de_servico
+    def agendarTempoDeServicoFila1(self, tempo_de_servico):
+        return tempo_de_servico
+
+    def agendarTempoDeServicoFila2(self, tempo_de_servico):
+        return tempo_de_servico
