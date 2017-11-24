@@ -9,6 +9,7 @@ class Cliente(object):
 
         self.__tempoChegadaFila2 = 0.0
         self.__tempoChegadaServico2 = 0.0
+        self.__tempoServico2 = 0.0
         self.__tempoTerminoServico2 = 0.0
         self.__tempoNCServico2 = 0.0
         self.__tempoDecorridoServico2 = 0.0
@@ -31,6 +32,9 @@ class Cliente(object):
 
     def setTempoChegadaServico2(self, tempo):
         self.__tempoChegadaServico2 = tempo
+
+    def setTempoServico2(self, tempo):
+        self.__tempoServico2 = tempo
 
     def setTempoTerminoServico2(self, tempo):
         self.__tempoTerminoServico2 = tempo
@@ -62,6 +66,9 @@ class Cliente(object):
 
     def getTempoChegadaServico2(self):
         return self.__tempoChegadaServico2
+
+    def getTempoServico2(self):
+        return self.__tempoServico2
 
     def getTempoTerminoServico2(self):
         return self.__tempoTerminoServico2
