@@ -1,7 +1,6 @@
 from controllers.agendador import *
 from models.cliente import *
 from models.fila import *
-from random import expovariate
 
 class Simulacao(object):
 
@@ -25,6 +24,8 @@ class Simulacao(object):
         self.__timerFimDeServicoClienteFila1 = -1
         self.__timerFimDeServicoClienteFila2 = -1
 
+        self.__somatorioPessoasPorTempo = 0
+
 
     def clienteEntraNaFila1(self):
         cliente = Cliente(self.__indice_proximo_cliente, self.__tempoAtual)
@@ -37,23 +38,25 @@ class Simulacao(object):
                 clienteInterrompido = self.__fila2.clienteEmAtendimento()
                 clienteInterrompido.setTempoDecorridoServico2(clienteInterrompido.getTempoServico2() - self.__timerFimDeServicoClienteFila2)
                 self.__timerFimDeServicoClienteFila2 = -1
+                print "Cliente %d foi interrompido em: %f" % (clienteInterrompido.getID(), self.__tempoAtual)
+
             cliente.setTempoChegadaServico1(self.__tempoAtual)
             print "Cliente %d comecou a ser atendido na fila 1 em: %f" % (cliente.getID(), self.__tempoAtual)
 
             self.__timerFimDeServicoClienteFila1 = self.__agendador.agendarTempoDeServicoFila1(self.__mi)
             cliente.setTempoServico1(self.__timerFimDeServicoClienteFila1)
-        
+
         self.__numero_de_clientes -= 1
         if self.__numero_de_clientes == 0:
             self.__timerChegadaClienteFila1 = -1
         else:    
             self.__timerChegadaClienteFila1 = self.__agendador.agendarChegadaFila1(self.__lambd)
-        
-        
+
+
     def clienteTerminaServicoNaFila1(self):
         cliente = self.__fila1.retirarClienteEmAtendimento()
         print "Cliente %d terminou o atendimento na fila 1 em: %f" % (cliente.getID(), self.__tempoAtual)
-        
+
         self.__fila2.adicionarClienteAFila(cliente)
         cliente.setTempoChegadaFila2(self.__tempoAtual)
         print "Cliente %d chegou na fila 2 em: %f" % (cliente.getID(), self.__tempoAtual)
@@ -70,6 +73,7 @@ class Simulacao(object):
             proximoCliente = self.__fila2.clienteEmAtendimento()
             if proximoCliente.getTempoDecorridoServico2() > 0: # Cliente que foi interrompido
                 self.__timerFimDeServicoClienteFila2 = proximoCliente.getTempoServico2() - proximoCliente.getTempoDecorridoServico2()
+                print "Cliente %d retomou o atendimento na fila 2 em: %f" % (proximoCliente.getID(), self.__tempoAtual)
             else: # Proximo cliente da fila
                 proximoCliente.setTempoChegadaServico2(self.__tempoAtual)
                 print "Cliente %d comecou a ser atendido na fila 2 em: %f" % (proximoCliente.getID(), self.__tempoAtual)
@@ -120,6 +124,8 @@ class Simulacao(object):
     def executarProximoEvento(self):
         proximoTimer = self.eventoDeDuracaoMinima()
         if proximoTimer == self.__timerChegadaClienteFila1Indice:
+            self.__somatorioPessoasPorTempo += self.__timerChegadaClienteFila1 * (self.__fila1.numeroDePessoasNaFila() + self.__fila2.numeroDePessoasNaFila())
+
             self.__tempoAtual += self.__timerChegadaClienteFila1
             if self.__timerFimDeServicoClienteFila1 != -1:
                 self.__timerFimDeServicoClienteFila1 -= self.__timerChegadaClienteFila1
@@ -128,6 +134,8 @@ class Simulacao(object):
             self.clienteEntraNaFila1()
 
         if proximoTimer == self.__timerFimDeServicoClienteFila1Indice:
+            self.__somatorioPessoasPorTempo += self.__timerFimDeServicoClienteFila1 * (self.__fila1.numeroDePessoasNaFila() + self.__fila2.numeroDePessoasNaFila())
+
             self.__tempoAtual += self.__timerFimDeServicoClienteFila1
             if self.__timerChegadaClienteFila1 != -1:
                 self.__timerChegadaClienteFila1 -= self.__timerFimDeServicoClienteFila1
@@ -136,6 +144,8 @@ class Simulacao(object):
             self.clienteTerminaServicoNaFila1()
 
         if proximoTimer == self.__timerFimDeServicoClienteFila2Indice:
+            self.__somatorioPessoasPorTempo += self.__timerFimDeServicoClienteFila2 * (self.__fila1.numeroDePessoasNaFila() + self.__fila2.numeroDePessoasNaFila())
+
             self.__tempoAtual += self.__timerFimDeServicoClienteFila2
             if self.__timerChegadaClienteFila1 != -1:
                 self.__timerChegadaClienteFila1 -= self.__timerFimDeServicoClienteFila2
@@ -153,6 +163,8 @@ class Simulacao(object):
 
         while self.__numero_de_clientes > 0 or self.__fila1.numeroDePessoasNaFila() > 0 or self.__fila2.numeroDePessoasNaFila() > 0:
             self.executarProximoEvento()
+
+        print "Media de clientes por tempo: %f" % (self.__somatorioPessoasPorTempo / self.__tempoAtual)
 
 
 if __name__ == "__main__":
