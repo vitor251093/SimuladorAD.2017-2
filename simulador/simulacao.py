@@ -155,7 +155,7 @@ class Simulacao(object):
         
 
     def run(self):
-        self.__mi = 0.1
+        self.__mi = 1
         self.__lambd = 0.1
         self.__numero_de_clientes = 99
 

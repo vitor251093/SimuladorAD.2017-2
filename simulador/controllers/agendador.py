@@ -9,7 +9,7 @@ class Agendador(object):
         return expovariate(lambd)
 
     def agendarTempoDeServicoFila1(self, mi):
-        return 2.0
+        return expovariate(mi)
 
     def agendarTempoDeServicoFila2(self, mi):
-        return 3.0
+        return expovariate(mi)
