@@ -56,7 +56,7 @@ class Cliente(object):
         return self.__tempoChegadaServico1
 
     def getTempoTerminoServico1(self):
-        return getTempoChegadaServico1() + getTempoServico1()
+        return self.getTempoChegadaServico1() + self.getTempoServico1()
 
     def getTempoServico1(self):
         return self.__tempoServico1
@@ -78,3 +78,26 @@ class Cliente(object):
 
     def getTempoDecorridoServico2(self):
         return self.__tempoDecorridoServico2
+
+
+
+    def getTempoEsperaFila1(self): # W1
+        return self.getTempoChegadaServico1() - self.getTempoChegadaFila1()
+
+    def getTempoTotalFila1(self): # T1
+        return self.getTempoEsperaFila1() + self.getTempoServico1()
+
+    def getVarianciaTempoEsperaFila1(self, esperancaTempoEsperaFila1): #VW1
+        return (self.getTempoEsperaFila1() - esperancaTempoEsperaFila1) ** 2
+
+
+    def getTempoEsperaFila2(self): # W2
+        return self.getTempoChegadaServico2() - self.getTempoChegadaFila2()
+
+    def getTempoTotalFila2(self): # T2
+        return self.getTempoTerminoServico2() - self.getTempoChegadaFila2()
+
+    def getVarianciaTempoEsperaFila2(self, esperancaTempoEsperaFila2): # VW2
+        return (self.getTempoEsperaFila2() - esperancaTempoEsperaFila2) ** 2
+
+    

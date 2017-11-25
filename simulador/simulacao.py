@@ -9,12 +9,13 @@ class Simulacao(object):
         self.__lambd = -1
         self.__mi = -1
 
+        self.__clientes = []
         self.__fila1 = Fila(1)
         self.__fila2 = Fila(2)
         
         self.__tempoAtual = 0.0
         self.__numero_de_clientes = 0
-        self.__indice_proximo_cliente = 1
+        self.__indice_cliente_atual = 0
 
         self.__timerChegadaClienteFila1Indice = 0
         self.__timerFimDeServicoClienteFila1Indice = 1
@@ -24,14 +25,31 @@ class Simulacao(object):
         self.__timerFimDeServicoClienteFila1 = -1
         self.__timerFimDeServicoClienteFila2 = -1
 
-        self.__somatorioPessoasPorTempo = 0
+        self.__somatorioPessoasFila1PorTempo = 0
+        self.__somatorioPessoasFilaEspera1PorTempo = 0
+        self.__somatorioPessoasFila2PorTempo = 0
+        self.__somatorioPessoasFilaEspera2PorTempo = 0
 
+    def agregarEmSomatorioPessoasPorTempo(self, tempo):
+        self.__somatorioPessoasFila1PorTempo += tempo * (self.__fila1.numeroDePessoasNaFila())
+        self.__somatorioPessoasFila2PorTempo += tempo * (self.__fila2.numeroDePessoasNaFila())
+
+        if self.__fila1.numeroDePessoasNaFila() > 0:
+            self.__somatorioPessoasFilaEspera1PorTempo += tempo * (self.__fila1.numeroDePessoasNaFila() - 1)
+
+        if self.__fila1.numeroDePessoasNaFila() > 0:
+            self.__somatorioPessoasFilaEspera2PorTempo += tempo * (self.__fila2.numeroDePessoasNaFila())
+        else:
+            if self.__fila2.numeroDePessoasNaFila() > 0:
+                self.__somatorioPessoasFilaEspera2PorTempo += tempo * (self.__fila2.numeroDePessoasNaFila() - 1)
 
     def clienteEntraNaFila1(self):
-        cliente = Cliente(self.__indice_proximo_cliente, self.__tempoAtual)
-        self.__indice_proximo_cliente += 1
-
+        self.__indice_cliente_atual += 1
+        cliente = Cliente(self.__indice_cliente_atual, self.__tempoAtual)
+        
+        self.__clientes.append(cliente)
         self.__fila1.adicionarClienteAFila(cliente)
+
         print "Cliente %d chegou na fila 1 em: %f" % (cliente.getID(), self.__tempoAtual)
         if self.__fila1.numeroDePessoasNaFila() == 1:
             if self.__fila2.numeroDePessoasNaFila() > 0: # Interrompe individuo da fila 2
@@ -46,8 +64,7 @@ class Simulacao(object):
             self.__timerFimDeServicoClienteFila1 = self.__agendador.agendarTempoDeServicoFila1(self.__mi)
             cliente.setTempoServico1(self.__timerFimDeServicoClienteFila1)
 
-        self.__numero_de_clientes -= 1
-        if self.__numero_de_clientes == 0:
+        if self.__numero_de_clientes - self.__indice_cliente_atual == 0:
             self.__timerChegadaClienteFila1 = -1
         else:    
             self.__timerChegadaClienteFila1 = self.__agendador.agendarChegadaFila1(self.__lambd)
@@ -83,6 +100,8 @@ class Simulacao(object):
 
     def clienteTerminaServicoNaFila2(self):
         cliente = self.__fila2.retirarClienteEmAtendimento()
+        cliente.setTempoTerminoServico2(self.__tempoAtual)
+
         print "Cliente %d terminou o atendimento na fila 2 em: %f" % (cliente.getID(), self.__tempoAtual)
         if self.__fila2.numeroDePessoasNaFila() > 0:
             proximoCliente = self.__fila2.clienteEmAtendimento()
@@ -124,7 +143,7 @@ class Simulacao(object):
     def executarProximoEvento(self):
         proximoTimer = self.eventoDeDuracaoMinima()
         if proximoTimer == self.__timerChegadaClienteFila1Indice:
-            self.__somatorioPessoasPorTempo += self.__timerChegadaClienteFila1 * (self.__fila1.numeroDePessoasNaFila() + self.__fila2.numeroDePessoasNaFila())
+            self.agregarEmSomatorioPessoasPorTempo(self.__timerChegadaClienteFila1)
 
             self.__tempoAtual += self.__timerChegadaClienteFila1
             if self.__timerFimDeServicoClienteFila1 != -1:
@@ -134,8 +153,8 @@ class Simulacao(object):
             self.clienteEntraNaFila1()
 
         if proximoTimer == self.__timerFimDeServicoClienteFila1Indice:
-            self.__somatorioPessoasPorTempo += self.__timerFimDeServicoClienteFila1 * (self.__fila1.numeroDePessoasNaFila() + self.__fila2.numeroDePessoasNaFila())
-
+            self.agregarEmSomatorioPessoasPorTempo(self.__timerFimDeServicoClienteFila1)
+            
             self.__tempoAtual += self.__timerFimDeServicoClienteFila1
             if self.__timerChegadaClienteFila1 != -1:
                 self.__timerChegadaClienteFila1 -= self.__timerFimDeServicoClienteFila1
@@ -144,8 +163,8 @@ class Simulacao(object):
             self.clienteTerminaServicoNaFila1()
 
         if proximoTimer == self.__timerFimDeServicoClienteFila2Indice:
-            self.__somatorioPessoasPorTempo += self.__timerFimDeServicoClienteFila2 * (self.__fila1.numeroDePessoasNaFila() + self.__fila2.numeroDePessoasNaFila())
-
+            self.agregarEmSomatorioPessoasPorTempo(self.__timerFimDeServicoClienteFila2)
+            
             self.__tempoAtual += self.__timerFimDeServicoClienteFila2
             if self.__timerChegadaClienteFila1 != -1:
                 self.__timerChegadaClienteFila1 -= self.__timerFimDeServicoClienteFila2
@@ -156,15 +175,47 @@ class Simulacao(object):
 
     def run(self):
         self.__mi = 1
-        self.__lambd = 0.1
-        self.__numero_de_clientes = 99
+        self.__lambd = 0.45
+        self.__numero_de_clientes = 190000
 
         self.__timerChegadaClienteFila1 = self.__agendador.agendarChegadaFila1(self.__lambd)
 
-        while self.__numero_de_clientes > 0 or self.__fila1.numeroDePessoasNaFila() > 0 or self.__fila2.numeroDePessoasNaFila() > 0:
+        while self.__numero_de_clientes > self.__indice_cliente_atual or self.__fila1.numeroDePessoasNaFila() > 0 or self.__fila2.numeroDePessoasNaFila() > 0:
             self.executarProximoEvento()
 
-        print "Media de clientes por tempo: %f" % (self.__somatorioPessoasPorTempo / self.__tempoAtual)
+        print "E[N1]:  %f" % (self.__somatorioPessoasFila1PorTempo / self.__tempoAtual)
+        print "E[Nq1]: %f" % (self.__somatorioPessoasFilaEspera1PorTempo / self.__tempoAtual)
+        print "E[N2]:  %f" % (self.__somatorioPessoasFila2PorTempo / self.__tempoAtual)
+        print "E[Nq2]: %f" % (self.__somatorioPessoasFilaEspera2PorTempo / self.__tempoAtual)
+
+        somatorioT1 = 0.0
+        somatorioW1 = 0.0
+        somatorioT2 = 0.0
+        somatorioW2 = 0.0
+        for cliente in self.__clientes:
+            somatorioT1 += cliente.getTempoTotalFila1()
+            somatorioW1 += cliente.getTempoEsperaFila1()
+            somatorioT2 += cliente.getTempoTotalFila2()
+            somatorioW2 += cliente.getTempoEsperaFila2()
+        ET1 = somatorioT1/len(self.__clientes)
+        EW1 = somatorioW1/len(self.__clientes)
+        ET2 = somatorioT2/len(self.__clientes)
+        EW2 = somatorioW2/len(self.__clientes)
+
+        somatorioVW1 = 0.0
+        somatorioVW2 = 0.0
+        for cliente in self.__clientes:
+            somatorioVW1 += cliente.getVarianciaTempoEsperaFila1(EW1)
+            somatorioVW2 += cliente.getVarianciaTempoEsperaFila2(EW2)
+        EVW1 = somatorioVW1/len(self.__clientes)
+        EVW2 = somatorioVW2/len(self.__clientes)
+
+        print "E[T1]:  %f" % (ET1)
+        print "E[W1]:  %f" % (EW1)
+        print "V(W1):  %f" % (EVW1)
+        print "E[T2]:  %f" % (ET2)
+        print "E[W2]:  %f" % (EW2)
+        print "V(W2):  %f" % (EVW2)
 
 
 if __name__ == "__main__":
