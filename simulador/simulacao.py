@@ -175,8 +175,8 @@ class Simulacao(object):
 
     def run(self):
         self.__mi = 1
-        self.__lambd = 0.45
-        self.__numero_de_clientes = 190000
+        self.__lambd = 0.4995
+        self.__numero_de_clientes = 1000000
 
         self.__timerChegadaClienteFila1 = self.__agendador.agendarChegadaFila1(self.__lambd)
 
