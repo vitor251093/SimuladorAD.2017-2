@@ -5,16 +5,18 @@ from models.fila import *
 class Simulacao(object):
 
     def __init__(self):
-        self.__agendador = Agendador()
-        self.__lambd = -1
-        self.__mi = -1
+        self.__mi = 1
+        self.__lambd = 0.4995
+        self.__numero_de_clientes = 1000000
 
+        
+        self.__agendador = Agendador()
+        
         self.__clientes = []
         self.__fila1 = Fila(1)
         self.__fila2 = Fila(2)
         
         self.__tempoAtual = 0.0
-        self.__numero_de_clientes = 0
         self.__indice_cliente_atual = 0
 
         self.__timerChegadaClienteFila1Indice = 0
@@ -174,19 +176,10 @@ class Simulacao(object):
         
 
     def run(self):
-        self.__mi = 1
-        self.__lambd = 0.4995
-        self.__numero_de_clientes = 1000000
-
         self.__timerChegadaClienteFila1 = self.__agendador.agendarChegadaFila1(self.__lambd)
 
         while self.__numero_de_clientes > self.__indice_cliente_atual or self.__fila1.numeroDePessoasNaFila() > 0 or self.__fila2.numeroDePessoasNaFila() > 0:
             self.executarProximoEvento()
-
-        print "E[N1]:  %f" % (self.__somatorioPessoasFila1PorTempo / self.__tempoAtual)
-        print "E[Nq1]: %f" % (self.__somatorioPessoasFilaEspera1PorTempo / self.__tempoAtual)
-        print "E[N2]:  %f" % (self.__somatorioPessoasFila2PorTempo / self.__tempoAtual)
-        print "E[Nq2]: %f" % (self.__somatorioPessoasFilaEspera2PorTempo / self.__tempoAtual)
 
         somatorioT1 = 0.0
         somatorioW1 = 0.0
@@ -213,9 +206,13 @@ class Simulacao(object):
         print "E[T1]:  %f" % (ET1)
         print "E[W1]:  %f" % (EW1)
         print "V(W1):  %f" % (EVW1)
+        print "E[N1]:  %f" % (self.__somatorioPessoasFila1PorTempo / self.__tempoAtual)
+        print "E[Nq1]: %f" % (self.__somatorioPessoasFilaEspera1PorTempo / self.__tempoAtual)
         print "E[T2]:  %f" % (ET2)
         print "E[W2]:  %f" % (EW2)
         print "V(W2):  %f" % (EVW2)
+        print "E[N2]:  %f" % (self.__somatorioPessoasFila2PorTempo / self.__tempoAtual)
+        print "E[Nq2]: %f" % (self.__somatorioPessoasFilaEspera2PorTempo / self.__tempoAtual)
 
 
 if __name__ == "__main__":
