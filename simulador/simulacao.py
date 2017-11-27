@@ -96,7 +96,6 @@ class Simulacao(object):
             else: # Proximo cliente da fila
                 self.__timerFimDeServicoClienteFila2 = self.__agendador.agendarTempoDeServicoFila2(self.__mi)
                 proximoCliente.setTempoServico2(self.__timerFimDeServicoClienteFila2)
-                proximoCliente.setTempoChegadaServico2(self.__tempoAtual)
 
     def clienteTerminaServicoNaFila2(self):
         cliente = self.__fila2.retirarClienteEmAtendimento()
@@ -105,7 +104,6 @@ class Simulacao(object):
         self.adicionarEvento(cliente, "terminou o atendimento", self.__fila2.getID(), self.__tempoAtual)
         if self.__fila2.numeroDePessoasNaFila() > 0:
             proximoCliente = self.__fila2.clienteEmAtendimento()
-            proximoCliente.setTempoChegadaServico2(self.__tempoAtual)
             
             self.__timerFimDeServicoClienteFila2 = self.__agendador.agendarTempoDeServicoFila2(self.__mi)
             proximoCliente.setTempoServico2(self.__timerFimDeServicoClienteFila2)
