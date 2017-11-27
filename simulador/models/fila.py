@@ -1,12 +1,10 @@
 from cliente import *
-from timeit import Timer
 
 class Fila(object):
 
     def __init__(self, id):
         self.__id = id
         self.__clientes = []
-        self.__timer = None
 
     # Retorna cliente e remove do topo da array
     def retirarClienteEmAtendimento(self):
