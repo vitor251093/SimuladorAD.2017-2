@@ -8,19 +8,11 @@ class Cliente(object):
         self.__tempoServico1 = 0.0
 
         self.__tempoChegadaFila2 = 0.0
-        self.__tempoChegadaServico2 = 0.0
         self.__tempoServico2 = 0.0
         self.__tempoTerminoServico2 = 0.0
-        self.__tempoNCServico2 = 0.0
         self.__tempoDecorridoServico2 = 0.0
 
     ## Setters
-    def setID(self, id):
-        self.__id = id
-
-    def setTempoChegadaFila1(self, tempo):
-        self.__tempoChegadaFila1 = tempo
-
     def setTempoChegadaServico1(self, tempo):
         self.__tempoChegadaServico1 = tempo
 
@@ -30,17 +22,11 @@ class Cliente(object):
     def setTempoChegadaFila2(self, tempo):
         self.__tempoChegadaFila2 = tempo
 
-    def setTempoChegadaServico2(self, tempo):
-        self.__tempoChegadaServico2 = tempo
-
     def setTempoServico2(self, tempo):
         self.__tempoServico2 = tempo
 
     def setTempoTerminoServico2(self, tempo):
         self.__tempoTerminoServico2 = tempo
-
-    def setTempoNCServico2(self, tempo):
-        self.__tempoNCServico2 = tempo
 
     def setTempoDecorridoServico2(self, tempo):
         self.__tempoDecorridoServico2 = tempo
@@ -55,26 +41,17 @@ class Cliente(object):
     def getTempoChegadaServico1(self):
         return self.__tempoChegadaServico1
 
-    def getTempoTerminoServico1(self):
-        return self.getTempoChegadaServico1() + self.getTempoServico1()
-
     def getTempoServico1(self):
         return self.__tempoServico1
 
     def getTempoChegadaFila2(self):
         return self.__tempoChegadaFila2
 
-    def getTempoChegadaServico2(self):
-        return self.__tempoChegadaServico2
-
     def getTempoServico2(self):
         return self.__tempoServico2
 
     def getTempoTerminoServico2(self):
         return self.__tempoTerminoServico2
-
-    def getTempoNCServico2(self):
-        return self.__tempoNCServico2
 
     def getTempoDecorridoServico2(self):
         return self.__tempoDecorridoServico2
@@ -92,7 +69,7 @@ class Cliente(object):
 
 
     def getTempoEsperaFila2(self): # W2
-        return self.getTempoChegadaServico2() - self.getTempoChegadaFila2()
+        return self.getTempoTerminoServico2() - self.getTempoChegadaFila2() - self.getTempoServico2()
 
     def getTempoTotalFila2(self): # T2
         return self.getTempoTerminoServico2() - self.getTempoChegadaFila2()
