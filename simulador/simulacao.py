@@ -19,6 +19,10 @@ class Simulacao(object):
         self.__tempoAtual = 0.0
         self.__indice_cliente_atual = 0
 
+        ### Codigo dos principais eventos da simulacao
+        # 0: Evento chegada de Cliente na Fila 1
+        # 1: Evento fim de servico 1
+        # 2: Evento fim de servico 2
         self.__timerChegadaClienteFila1Indice = 0
         self.__timerFimDeServicoClienteFila1Indice = 1
         self.__timerFimDeServicoClienteFila2Indice = 2
@@ -32,7 +36,7 @@ class Simulacao(object):
         self.__somatorioPessoasFila2PorTempo = 0
         self.__somatorioPessoasFilaEspera2PorTempo = 0
 
-    def agregarEmSomatorioPessoasPorTempo(self, tempo):
+    def agregarEmSomatorioPessoasPorTempo (self, tempo):
         self.__somatorioPessoasFila1PorTempo += tempo * (self.__fila1.numeroDePessoasNaFila())
         self.__somatorioPessoasFila2PorTempo += tempo * (self.__fila2.numeroDePessoasNaFila())
 
@@ -45,11 +49,11 @@ class Simulacao(object):
             if self.__fila2.numeroDePessoasNaFila() > 0:
                 self.__somatorioPessoasFilaEspera2PorTempo += tempo * (self.__fila2.numeroDePessoasNaFila() - 1)
 
-    def adicionarEvento(self, cliente, evento, fila, momento):
+    def adicionarEvento (self, cliente, evento, fila, momento):
         print "%f: Cliente %d %s na fila %d" % (momento, cliente.getID(), evento, fila)
         return
 
-    def clienteEntraNaFila1(self):
+    def clienteEntraNaFila1 (self):
         self.__indice_cliente_atual += 1
         cliente = Cliente(self.__indice_cliente_atual, self.__tempoAtual)
         
@@ -112,29 +116,65 @@ class Simulacao(object):
 
 
     def eventoDeDuracaoMinima(self):
+
+        """ Esse metodo faz o simulador "entrar" nos eventos corretos
+            de acordo com uma serie de condicoes explicitadas abaixo.
+            Tambem verifica quais dos tres principais eventos ocorre antes. """
+
+
+        # Aqui marco os acontecimentos dos tres principais eventos da Simulacao:
+        # timerValido1, timerValido2 e timerValido3.
+
+
+        # Quer dizer que o evento chegada de cliente na fila 1 ocorreu.
         timerValido1 = (self.__timerChegadaClienteFila1      != -1)
+
+
+        # Quer dizer que o evento fim do servico 1 ocorreu.
         timerValido2 = (self.__timerFimDeServicoClienteFila1 != -1)
+
+
+        # Quer dizer que o evento fim do servico 2 ocorreu.
         timerValido3 = (self.__timerFimDeServicoClienteFila2 != -1)
 
+
+        # Se nao ocorreu chegada alguma e tambem nao ocorreu nenhum fim de servico 1,
+        # isso quer dizer que o proximo evento eh finalizar o fim de servico 2.
+        # Aqui atendo clientes da fila 2 ate chegar alguem na fila 1.
         if timerValido1 == False and timerValido2 == False:
             return self.__timerFimDeServicoClienteFila2Indice
 
+        # Se nao ocorreu nenhuma chegada na Fila 1 e nao ocorreu nenhum fim de servico 2,
+        # isso quer dizer que existia alguem recebendo o servico 1 e o proximo evento e finalizar seu servico.
         if timerValido1 == False and timerValido3 == False:
             return self.__timerFimDeServicoClienteFila1Indice
 
+        # Se nao teve fim de servico 1 e nem fim de servico 2,
+        # isso quer dizer que o proximo evento e a chegada de alguem na fila 1.
         if timerValido2 == False and timerValido3 == False:
             return self.__timerChegadaClienteFila1Indice
 
+        # Retorno 0 caso o evento fim de servico 1 aconteca antes de todos.
+        # Retorno 2 caso contrario, pois como timerValido1 eh False, significa que nao houve chegada na Fila 1
         if timerValido1 == False:
             return self.__timerFimDeServicoClienteFila1Indice if self.__timerFimDeServicoClienteFila1 <= self.__timerFimDeServicoClienteFila2 else self.__timerFimDeServicoClienteFila2Indice
 
+        # Como timerValido2 eh False, sei que nao houve fim do servico 1 de algum Cliente.
+        # Retorno 1 caso o evento chegada de Cliente na Fila 1 aconteca antes.
+        # Retorno 2 caso contrario, o que significa que houve um fim de um servico 2.
         if timerValido2 == False:
             return self.__timerChegadaClienteFila1Indice if self.__timerChegadaClienteFila1 <= self.__timerFimDeServicoClienteFila2 else self.__timerFimDeServicoClienteFila2Indice
 
+        # Como timerValido3 eh False, sei que nao houve fim de um servico 2.
+        # Retorno 0 caso o evento chegada Cliente na Fila 1 aconteca antes.
+        # Retorno 1 caso contrario, o que significa que houve um fim de servico 1.
         if timerValido3 == False:
             return self.__timerChegadaClienteFila1Indice if self.__timerChegadaClienteFila1 <= self.__timerFimDeServicoClienteFila1 else self.__timerFimDeServicoClienteFila1Indice
 
+        # A lista de tempos dos tres eventos que ocorrem durante o tempo de simulacao.
         lista = [self.__timerChegadaClienteFila1, self.__timerFimDeServicoClienteFila1, self.__timerFimDeServicoClienteFila2]
+
+        # Retorno o menor, ou seja, o que ocorreu antes.
         return lista.index(min(lista))
 
     def executarProximoEvento(self):
@@ -171,11 +211,20 @@ class Simulacao(object):
         
 
     def run(self):
+
+        """"""
+
+        # Comeco agendando a chegada do primeiro Cliente no sistema.
+        # A partir dela os proximo eventos sao gerados no loop principal da simulacao (mais abaixo).
         self.__timerChegadaClienteFila1 = self.__agendador.agendarChegadaFila1(self.__lambd)
 
+
+        # Loop principal da simulacao
         while self.__numero_de_clientes > self.__indice_cliente_atual or self.__fila1.numeroDePessoasNaFila() > 0 or self.__fila2.numeroDePessoasNaFila() > 0:
             self.executarProximoEvento()
 
+
+        # Calculo de estatisticas da simulacao
         somatorioT1 = 0.0
         somatorioW1 = 0.0
         somatorioT2 = 0.0
@@ -198,6 +247,8 @@ class Simulacao(object):
         EVW1 = somatorioVW1/len(self.__clientes)
         EVW2 = somatorioVW2/len(self.__clientes)
 
+
+        # Impressao dos resultados das estatisticas
         print "E[T1]:  %f" % (ET1)
         print "E[W1]:  %f" % (EW1)
         print "V(W1):  %f" % (EVW1)
