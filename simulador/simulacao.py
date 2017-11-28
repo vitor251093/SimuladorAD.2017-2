@@ -118,7 +118,7 @@ class Simulacao(object):
     def eventoDeDuracaoMinima(self):
 
         """ Esse metodo avalia qual o proximo evento em que o simulador deve 
-            "entrar" baseado naquele que levará menos tempo para ocorrer no 
+            "entrar" baseado naquele que levara menos tempo para ocorrer no 
             instante atual. """
 
 
