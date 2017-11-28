@@ -117,64 +117,88 @@ class Simulacao(object):
 
     def eventoDeDuracaoMinima(self):
 
-        """ Esse metodo faz o simulador "entrar" nos eventos corretos
-            de acordo com uma serie de condicoes explicitadas abaixo.
-            Tambem verifica quais dos tres principais eventos ocorre antes. """
+        """ Esse metodo avalia qual o proximo evento em que o simulador deve 
+            "entrar" baseado naquele que levará menos tempo para ocorrer no 
+            instante atual. """
 
 
-        # Aqui marco os acontecimentos dos tres principais eventos da Simulacao:
+        # Aqui avaliamos quais dos tres principais eventos da simulacao estao agendados:
         # timerValido1, timerValido2 e timerValido3.
 
-
-        # Quer dizer que o evento chegada de cliente na fila 1 ocorreu.
+        # Quer dizer que o evento chegada de cliente na fila 1 esta agendado.
         timerValido1 = (self.__timerChegadaClienteFila1      != -1)
 
-
-        # Quer dizer que o evento fim do servico 1 ocorreu.
+        # Quer dizer que o evento fim do servico 1 esta agendado.
         timerValido2 = (self.__timerFimDeServicoClienteFila1 != -1)
 
-
-        # Quer dizer que o evento fim do servico 2 ocorreu.
+        # Quer dizer que o evento fim do servico 2 esta agendado.
         timerValido3 = (self.__timerFimDeServicoClienteFila2 != -1)
 
 
-        # Se nao ocorreu chegada alguma e tambem nao ocorreu nenhum fim de servico 1,
-        # isso quer dizer que o proximo evento eh finalizar o fim de servico 2.
-        # Aqui atendo clientes da fila 2 ate chegar alguem na fila 1.
+        # Essa eh apenas uma condicional para a unica condicao inexperada:
+        # a de que nenhuma acao esteja agendada para acontecer;
+        # Esse caso so pode ocorrer se houver uma falha do programa,
+        # ja que ele deve ser interrompido logo antes disso ocorrer
+        if timerValido1 == False and timerValido2 == False and timerValido3 == False:
+            return -1
+
+
+        # As proximas tres condicoes remetem aos casos em que apenas um dos tres
+        # eventos esta agendado para ocorrer, entao nao eh necessario
+        # compara-los para ver qual ocorrera primeiro:
+
+        # Se nenhuma chegada ira ocorrer e nao ha um cliente da fila 1 sendo
+        # atendidos no momento, quer dizer que o proximo evento eh finalizar o 
+        # servico de um cliente da fila 2. 
         if timerValido1 == False and timerValido2 == False:
             return self.__timerFimDeServicoClienteFila2Indice
 
-        # Se nao ocorreu nenhuma chegada na Fila 1 e nao ocorreu nenhum fim de servico 2,
-        # isso quer dizer que existia alguem recebendo o servico 1 e o proximo evento e finalizar seu servico.
+        # Se nenhuma chegada ira ocorrer e nao ha um cliente da fila 2 sendo
+        # atendido no momento, quer dizer que o proximo evento eh o fim 
+        # do servico de um cliente da fila 1.
         if timerValido1 == False and timerValido3 == False:
             return self.__timerFimDeServicoClienteFila1Indice
 
-        # Se nao teve fim de servico 1 e nem fim de servico 2,
-        # isso quer dizer que o proximo evento e a chegada de alguem na fila 1.
+        # Se nao ha pessoas da fila 1 nem da fila 2 sendo atendidos,
+        # entao o proximo evento eh a chegada de alguem no sistema.
         if timerValido2 == False and timerValido3 == False:
             return self.__timerChegadaClienteFila1Indice
 
-        # Retorno 0 caso o evento fim de servico 1 aconteca antes de todos.
-        # Retorno 2 caso contrario, pois como timerValido1 eh False, significa que nao houve chegada na Fila 1
+
+        # As proximas tres condicoes remetem aos casos em que apenas dois dos tres
+        # eventos estao agendados para ocorrer, entao so eh necessario comparar
+        # esses dois para ver qual ocorrera primeiro:
+
+        # Considerando que ninguem entrara no sistema: O fim de servico de um cliente 
+        # da fila 1 ou o fim de servico de um cliente da fila 2 devera acontecer, dependendo
+        # de qual dos dois ocorrera em um tempo menor.
         if timerValido1 == False:
             return self.__timerFimDeServicoClienteFila1Indice if self.__timerFimDeServicoClienteFila1 <= self.__timerFimDeServicoClienteFila2 else self.__timerFimDeServicoClienteFila2Indice
 
-        # Como timerValido2 eh False, sei que nao houve fim do servico 1 de algum Cliente.
-        # Retorno 1 caso o evento chegada de Cliente na Fila 1 aconteca antes.
-        # Retorno 2 caso contrario, o que significa que houve um fim de um servico 2.
+        # Considerando que nao ha cliente sendo atendido na fila 1: um cliente entrara
+        # no sistema ou o fim de servico de um cliente da fila 2 devera acontecer, dependendo
+        # de qual dos dois ocorrera em um tempo menor.
         if timerValido2 == False:
             return self.__timerChegadaClienteFila1Indice if self.__timerChegadaClienteFila1 <= self.__timerFimDeServicoClienteFila2 else self.__timerFimDeServicoClienteFila2Indice
 
-        # Como timerValido3 eh False, sei que nao houve fim de um servico 2.
-        # Retorno 0 caso o evento chegada Cliente na Fila 1 aconteca antes.
-        # Retorno 1 caso contrario, o que significa que houve um fim de servico 1.
+        # Considerando que nao ha cliente sendo atendido na fila 2: um cliente entrara
+        # no sistema ou o fim de servico de um cliente da fila 1 devera acontecer, dependendo
+        # de qual dos dois ocorrera em um tempo menor.
         if timerValido3 == False:
             return self.__timerChegadaClienteFila1Indice if self.__timerChegadaClienteFila1 <= self.__timerFimDeServicoClienteFila1 else self.__timerFimDeServicoClienteFila1Indice
 
-        # A lista de tempos dos tres eventos que ocorrem durante o tempo de simulacao.
+        
+        # A proxima condicao remete ao caso em que os tres eventos estao agendados 
+        # para ocorrer, entao eh necessario comparar os tres para ver qual ocorrera primeiro:
+        
+        # Eh criada uma lista com o tempo que falta ate que cada um dos tres eventos 
+        # principais agendados ocorra, ordenados em eventos 0, 1 e 2, posicionados
+        # nos respectivos indices da lista
         lista = [self.__timerChegadaClienteFila1, self.__timerFimDeServicoClienteFila1, self.__timerFimDeServicoClienteFila2]
 
-        # Retorno o menor, ou seja, o que ocorreu antes.
+        # Com min(lista), retornamos o menor dos tres tempos presentes na lista;
+        # com lista.index(), retornamos o indice desse tempo na lista, conseguindo assim 
+        # saber qual o evento com o menor tempo faltante para ocorrer
         return lista.index(min(lista))
 
     def executarProximoEvento(self):
