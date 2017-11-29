@@ -7,8 +7,8 @@ class Plot(object):
         return
 
     def run(self):
-        # N = numpy.loadtxt('traces.csv', unpack=True, delimiter=',')
-        N = [1,10,2,8,4,6,5,5,5,5]
+        N = numpy.loadtxt('vetorEN10k.csv', unpack=True, delimiter=',')
+        #N = [1,10,2,8,4,6,5,5,5,5]
         pyplot.plot(N)
         #pyplot.title('')
         #pyplot.ylabel('')

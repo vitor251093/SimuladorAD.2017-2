@@ -7,7 +7,7 @@ class Simulacao(object):
     def __init__(self):
         self.__mi = 1
         self.__lambd = 0.4995
-        self.__numero_de_clientes = 1000000
+        self.__numero_de_clientes = 10000
 
         
         self.__agendador = Agendador()
@@ -50,7 +50,22 @@ class Simulacao(object):
                 self.__somatorioPessoasFilaEspera2PorTempo += tempo * (self.__fila2.numeroDePessoasNaFila() - 1)
 
     def adicionarEvento (self, cliente, evento, fila, momento):
-        print "%f: Cliente %d %s na fila %d" % (momento, cliente.getID(), evento, fila)
+        #print "%f: Cliente %d %s na fila %d" % (momento, cliente.getID(), evento, fila)
+        
+        # TODO: Remover isso se nao funcionar
+        somatorioT = 0
+        totalClientes = 0
+        for cliente in self.__clientes:
+            if cliente.getTempoTerminoServico2() != 0:
+                totalClientes += 1
+                somatorioT += cliente.getTempoTotalFila1()
+                somatorioT += cliente.getTempoTotalFila2()
+        if totalClientes == 0:
+            ET = 0
+        else:
+            ET = somatorioT/totalClientes
+        print "%d" % (ET)
+
         return
 
     def clienteEntraNaFila1 (self):
