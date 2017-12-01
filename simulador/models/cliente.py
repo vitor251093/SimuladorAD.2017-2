@@ -1,3 +1,6 @@
+""" Classe Cliente que guardara todas as informacoes pertinentes ao cliente,
+    do momento que chega, ate o momento que sai do sistema. """
+
 class Cliente(object):
 
     def __init__(self, id, tempoChegadaNoSistema):
@@ -12,7 +15,9 @@ class Cliente(object):
         self.__tempoTerminoServico2 = 0.0
         self.__tempoDecorridoServico2 = 0.0
 
+    ##############
     ## Setters
+    ##############
     def setTempoChegadaServico1(self, tempo):
         self.__tempoChegadaServico1 = tempo
 
@@ -31,7 +36,9 @@ class Cliente(object):
     def setTempoDecorridoServico2(self, tempo):
         self.__tempoDecorridoServico2 = tempo
 
+    ###############
     ## Getters
+    ###############
     def getID(self):
         return self.__id
 
@@ -56,8 +63,7 @@ class Cliente(object):
     def getTempoDecorridoServico2(self):
         return self.__tempoDecorridoServico2
 
-
-
+    ### Getters para calculos estatisticos
     def getTempoEsperaFila1(self): # W1
         return self.getTempoChegadaServico1() - self.getTempoChegadaFila1()
 
