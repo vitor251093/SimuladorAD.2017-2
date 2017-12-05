@@ -50,22 +50,7 @@ class Simulacao(object):
                 self.__somatorioPessoasFilaEspera2PorTempo += tempo * (self.__fila2.numeroDePessoasNaFila() - 1)
 
     def adicionarEvento (self, cliente, evento, fila, momento):
-        #print "%f: Cliente %d %s na fila %d" % (momento, cliente.getID(), evento, fila)
-        
-        # TODO: Remover isso se nao funcionar
-        somatorioT = 0
-        totalClientes = 0
-        for cliente in self.__clientes:
-            if cliente.getTempoTerminoServico2() != 0:
-                totalClientes += 1
-                somatorioT += cliente.getTempoTotalFila1()
-                somatorioT += cliente.getTempoTotalFila2()
-        if totalClientes == 0:
-            ET = 0
-        else:
-            ET = somatorioT/totalClientes
-        print "%d" % (ET)
-
+        print "%f: Cliente %d %s na fila %d" % (momento, cliente.getID(), evento, fila)
         return
 
     def clienteEntraNaFila1 (self):
@@ -249,9 +234,8 @@ class Simulacao(object):
             self.clienteTerminaServicoNaFila2()
         
 
-    def run(self):
-
-        """"""
+    def run(self, seed):
+        self.__agendador.configurarSemente(seed)
 
         # Comeco agendando a chegada do primeiro Cliente no sistema.
         # A partir dela os proximo eventos sao gerados no loop principal da simulacao (mais abaixo).
@@ -301,4 +285,4 @@ class Simulacao(object):
 
 
 if __name__ == "__main__":
-    Simulacao().run()
+    Simulacao().run(1000)
