@@ -251,8 +251,23 @@ class Simulacao(object):
         
 
     """ Principal metodo da classe Simulacao. Aqui inicio toda a simulacao. """
-    def run(self, seed):
+    def executarSimulacao(self, seed):
         self.__agendador.configurarSemente(seed)
+
+        # Resetando valores para se executar uma nova simulacao
+        self.__clientes = []
+        self.__fila1 = Fila(1)
+        self.__fila2 = Fila(2)
+        self.__tempoAtual = 0.0
+        self.__indice_cliente_atual = 0
+        self.__timerChegadaClienteFila1 = -1
+        self.__timerFimDeServicoClienteFila1 = -1
+        self.__timerFimDeServicoClienteFila2 = -1
+        self.__somatorioPessoasFila1PorTempo = 0
+        self.__somatorioPessoasFilaEspera1PorTempo = 0
+        self.__somatorioPessoasFila2PorTempo = 0
+        self.__somatorioPessoasFilaEspera2PorTempo = 0
+
 
         # Comeco agendando a chegada do primeiro Cliente no sistema.
         # A partir dela os proximo eventos sao gerados no loop principal da simulacao (mais abaixo).
@@ -302,4 +317,4 @@ class Simulacao(object):
 
 
 if __name__ == "__main__":
-    Simulacao().run(1000)
+    Simulacao().executarSimulacao(1000)
