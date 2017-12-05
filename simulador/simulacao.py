@@ -1,6 +1,7 @@
 from controllers.agendador import *
 from models.cliente import *
 from models.fila import *
+import random
 
 
 """ Principal classe do simulador. Simulacao possui o metodo run que inicia todo o processo. """
@@ -10,7 +11,7 @@ class Simulacao(object):
     def __init__(self):
         self.__mi = 1
         self.__lambd = 0.4995
-        self.__numero_de_clientes = 10000
+        self.__numero_de_clientes = 1000
 
         
         self.__agendador = Agendador()
@@ -254,21 +255,6 @@ class Simulacao(object):
     def executarSimulacao(self, seed):
         self.__agendador.configurarSemente(seed)
 
-        # Resetando valores para se executar uma nova simulacao
-        self.__clientes = []
-        self.__fila1 = Fila(1)
-        self.__fila2 = Fila(2)
-        self.__tempoAtual = 0.0
-        self.__indice_cliente_atual = 0
-        self.__timerChegadaClienteFila1 = -1
-        self.__timerFimDeServicoClienteFila1 = -1
-        self.__timerFimDeServicoClienteFila2 = -1
-        self.__somatorioPessoasFila1PorTempo = 0
-        self.__somatorioPessoasFilaEspera1PorTempo = 0
-        self.__somatorioPessoasFila2PorTempo = 0
-        self.__somatorioPessoasFilaEspera2PorTempo = 0
-
-
         # Comeco agendando a chegada do primeiro Cliente no sistema.
         # A partir dela os proximo eventos sao gerados no loop principal da simulacao (mais abaixo).
         self.__timerChegadaClienteFila1 = self.__agendador.agendarChegadaFila1(self.__lambd)
@@ -316,5 +302,25 @@ class Simulacao(object):
         print "E[Nq2]: %f" % (self.__somatorioPessoasFilaEspera2PorTempo / self.__tempoAtual)
 
 
+def randomNumber():
+    return random.random()
+
+def randomNumberDistantFrom(numbersList, distance):
+    newNumber = 0
+    while newNumber == 0:
+        newNumber = randomNumber()
+        for number in numbersList:
+            if abs(newNumber - number) < distance:
+                newNumber = 0
+    return newNumber
+
 if __name__ == "__main__":
-    Simulacao().executarSimulacao(1000)
+    numberOfSimulations = 5
+    distance = 0.01
+
+    numbersList = []
+
+    for i in range(numberOfSimulations):
+        newSeed = randomNumberDistantFrom(numbersList, distance)
+        Simulacao().executarSimulacao(newSeed)
+        numbersList.append(newSeed)
