@@ -1,5 +1,8 @@
 import random
 
+""" O Agendador sera responsavel por agendar chegadas e servicos
+    de acordo com as taxas lambda e mi, respectivamente """
+
 class Agendador(object):
 
     def __init__(self):

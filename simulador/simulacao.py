@@ -2,6 +2,9 @@ from controllers.agendador import *
 from models.cliente import *
 from models.fila import *
 
+
+""" Principal classe do simulador. Simulacao possui o metodo run que inicia todo o processo. """
+
 class Simulacao(object):
 
     def __init__(self):
@@ -19,7 +22,7 @@ class Simulacao(object):
         self.__tempoAtual = 0.0
         self.__indice_cliente_atual = 0
 
-        ### Codigo dos principais eventos da simulacao
+        ### Codigo dos principais eventos da simulacao:
         # 0: Evento chegada de Cliente na Fila 1
         # 1: Evento fim de servico 1
         # 2: Evento fim de servico 2
@@ -27,15 +30,19 @@ class Simulacao(object):
         self.__timerFimDeServicoClienteFila1Indice = 1
         self.__timerFimDeServicoClienteFila2Indice = 2
 
+        ### Todos iniciam com valores invalidos: -1
         self.__timerChegadaClienteFila1 = -1
         self.__timerFimDeServicoClienteFila1 = -1
         self.__timerFimDeServicoClienteFila2 = -1
 
+        ### Atributos usados para calculos estatisticos
         self.__somatorioPessoasFila1PorTempo = 0
         self.__somatorioPessoasFilaEspera1PorTempo = 0
         self.__somatorioPessoasFila2PorTempo = 0
         self.__somatorioPessoasFilaEspera2PorTempo = 0
 
+    """ Esse metodo apenas fica responsavel por relizar os somatorios
+        para calculo do numero medio de pessoas nas duas filas. """
     def agregarEmSomatorioPessoasPorTempo (self, tempo):
         self.__somatorioPessoasFila1PorTempo += tempo * (self.__fila1.numeroDePessoasNaFila())
         self.__somatorioPessoasFila2PorTempo += tempo * (self.__fila2.numeroDePessoasNaFila())
@@ -114,6 +121,9 @@ class Simulacao(object):
         else:
             self.__timerFimDeServicoClienteFila2 = -1
 
+    """ eventoDeDuracaoMinima() ira cuidar da verificacao de qual evento ocorre antes.
+        Temos 3 eventos principais: tempo de chegada na fila 1, fim de servico 1 e
+        fim de servico 2. Aqui verificamos qual acontece antes. """
 
     def eventoDeDuracaoMinima(self):
 
@@ -201,8 +211,14 @@ class Simulacao(object):
         # saber qual o evento com o menor tempo faltante para ocorrer
         return lista.index(min(lista))
 
+
+    """ O metodo executarProximoEvento(), como o proprio nome diz, executa o proximo evento,
+        com base no que foi "decidido" no metodo eventoDeDuracaoMinima(). """
     def executarProximoEvento(self):
+
         proximoTimer = self.eventoDeDuracaoMinima()
+
+        # Tres eventos principais, tres ifs principais.
         if proximoTimer == self.__timerChegadaClienteFila1Indice:
             self.agregarEmSomatorioPessoasPorTempo(self.__timerChegadaClienteFila1)
 
@@ -234,6 +250,7 @@ class Simulacao(object):
             self.clienteTerminaServicoNaFila2()
         
 
+    """ Principal metodo da classe Simulacao. Aqui inicio toda a simulacao. """
     def run(self, seed):
         self.__agendador.configurarSemente(seed)
 
