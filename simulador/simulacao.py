@@ -10,8 +10,8 @@ class Simulacao(object):
 
     def __init__(self):
         self.__mi = 1
-        self.__lambd = 0.4995
-        self.__numero_de_clientes = 1000
+        self.__lambd = 0.3
+        self.__numero_de_clientes = 100000
 
         
         self.__agendador = Agendador()
@@ -58,7 +58,11 @@ class Simulacao(object):
                 self.__somatorioPessoasFilaEspera2PorTempo += tempo * (self.__fila2.numeroDePessoasNaFila() - 1)
 
     def adicionarEvento (self, cliente, evento, fila, momento):
-        print "%f: Cliente %d %s na fila %d" % (momento, cliente.getID(), evento, fila)
+        #print "%f: Cliente %d %s na fila %d" % (momento, cliente.getID(), evento, fila)
+
+        ENt = (self.__somatorioPessoasFila1PorTempo + self.__somatorioPessoasFila2PorTempo)/momento
+        print "%f" % (ENt)
+
         return
 
     def clienteEntraNaFila1 (self):
@@ -315,12 +319,12 @@ def randomNumberDistantFrom(numbersList, distance):
     return newNumber
 
 if __name__ == "__main__":
-    numberOfSimulations = 5
-    distance = 0.01
+    numberOfSimulations = 1
+    seedsDistance = 0.01
 
     numbersList = []
 
     for i in range(numberOfSimulations):
-        newSeed = randomNumberDistantFrom(numbersList, distance)
+        newSeed = randomNumberDistantFrom(numbersList, seedsDistance)
         Simulacao().executarSimulacao(newSeed)
         numbersList.append(newSeed)
