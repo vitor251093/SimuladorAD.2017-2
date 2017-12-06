@@ -12,7 +12,6 @@ class Simulacao(object):
         self.__mi = 1
         self.__lambd = 0.3
         self.__numero_de_clientes = 100000
-
         
         self.__agendador = Agendador()
         
@@ -42,6 +41,10 @@ class Simulacao(object):
         self.__somatorioPessoasFila2PorTempo = 0
         self.__somatorioPessoasFilaEspera2PorTempo = 0
 
+        self.__quantidadeDeEventosPorVariancia = 100
+        self.__eventosDaVariancia1 = []
+        self.__eventosDaVariancia2 = []
+
     """ Esse metodo apenas fica responsavel por relizar os somatorios
         para calculo do numero medio de pessoas nas duas filas. """
     def agregarEmSomatorioPessoasPorTempo (self, tempo):
@@ -60,8 +63,24 @@ class Simulacao(object):
     def adicionarEvento (self, cliente, evento, fila, momento):
         #print "%f: Cliente %d %s na fila %d" % (momento, cliente.getID(), evento, fila)
 
-        ENt = (self.__somatorioPessoasFila1PorTempo + self.__somatorioPessoasFila2PorTempo)/momento
-        print "%f" % (ENt)
+        # TODO: Calcular Covariancia
+        """ENt = (self.__somatorioPessoasFila1PorTempo + self.__somatorioPessoasFila2PorTempo)/momento
+
+        if len(self.__eventosDaVariancia1) < self.__quantidadeDeEventosPorVariancia:
+            self.__eventosDaVariancia1.append(ENt)
+        else if len(self.__eventosDaVariancia2) < self.__quantidadeDeEventosPorVariancia:
+            self.__eventosDaVariancia2.append(ENt)
+            if len(self.__eventosDaVariancia2) == self.__quantidadeDeEventosPorVariancia:
+                variancia1 = 0
+                variancia2 = 0
+                for indiceEvento in range(self.__quantidadeDeEventosPorVariancia):
+                    variancia1 += self.__eventosDaVariancia1[indiceEvento]
+                    variancia2 += self.__eventosDaVariancia2[indiceEvento]
+                variancia1 /= self.__quantidadeDeEventosPorVariancia
+                variancia2 /= self.__quantidadeDeEventosPorVariancia"""
+                
+        
+        #print "%f" % (ENt)
 
         return
 
