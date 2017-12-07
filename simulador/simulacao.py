@@ -2,7 +2,7 @@ from controllers.agendador import *
 from models.cliente import *
 from models.fila import *
 import random
-
+import math
 
 """ Principal classe do simulador. Simulacao possui o metodo run que inicia todo o processo. """
 
@@ -43,7 +43,9 @@ class Simulacao(object):
 
         self.__quantidadeDeEventosPorVariancia = 100
         self.__eventosDaVariancia1 = []
+        self.__duracaoEventosDaVariancia1 = []
         self.__eventosDaVariancia2 = []
+        self.__duracaoEventosDaVariancia2 = []
 
     """ Esse metodo apenas fica responsavel por relizar os somatorios
         para calculo do numero medio de pessoas nas duas filas. """
@@ -63,25 +65,41 @@ class Simulacao(object):
     def adicionarEvento (self, cliente, evento, fila, momento):
         #print "%f: Cliente %d %s na fila %d" % (momento, cliente.getID(), evento, fila)
 
-        # TODO: Calcular Covariancia
-        """ENt = (self.__somatorioPessoasFila1PorTempo + self.__somatorioPessoasFila2PorTempo)/momento
+        ENt = (self.__somatorioPessoasFila1PorTempo + self.__somatorioPessoasFila2PorTempo)
 
         if len(self.__eventosDaVariancia1) < self.__quantidadeDeEventosPorVariancia:
             self.__eventosDaVariancia1.append(ENt)
+            self.__duracaoEventosDaVariancia1.append(momento)
+
         else if len(self.__eventosDaVariancia2) < self.__quantidadeDeEventosPorVariancia:
             self.__eventosDaVariancia2.append(ENt)
+            self.__duracaoEventosDaVariancia2.append(momento)
+
             if len(self.__eventosDaVariancia2) == self.__quantidadeDeEventosPorVariancia:
+                media1 = 0
+                media2 = 0
+                duracao1 = 0
+                duracao2 = 0
+                for indiceEvento in range(self.__quantidadeDeEventosPorVariancia):
+                    media1 += self.__eventosDaVariancia1[indiceEvento]*self.__duracaoEventosDaVariancia1[indiceEvento]
+                    media2 += self.__eventosDaVariancia2[indiceEvento]*self.__duracaoEventosDaVariancia2[indiceEvento]
+                    duracao1 += self.__duracaoEventosDaVariancia1[indiceEvento]
+                    duracao2 += self.__duracaoEventosDaVariancia2[indiceEvento]
+                media1 /= duracao1
+                media2 /= duracao2
+                
                 variancia1 = 0
                 variancia2 = 0
                 for indiceEvento in range(self.__quantidadeDeEventosPorVariancia):
-                    variancia1 += self.__eventosDaVariancia1[indiceEvento]
-                    variancia2 += self.__eventosDaVariancia2[indiceEvento]
-                variancia1 /= self.__quantidadeDeEventosPorVariancia
-                variancia2 /= self.__quantidadeDeEventosPorVariancia"""
-                
-        
-        #print "%f" % (ENt)
+                    variancia1 += (self.__eventosDaVariancia1[indiceEvento] - media1)**2
+                    variancia2 += (self.__eventosDaVariancia2[indiceEvento] - media2)**2
+                variancia1 /= (self.__quantidadeDeEventosPorVariancia - 1)
+                variancia2 /= (self.__quantidadeDeEventosPorVariancia - 1)
+                desvioPadrao1 = math.sqrt(variancia1)
+                desvioPadrao2 = math.sqrt(variancia2)
 
+                # E preciso calcular o Intervalo de Confianca entre as duas variancias
+        
         return
 
     def clienteEntraNaFila1 (self):
