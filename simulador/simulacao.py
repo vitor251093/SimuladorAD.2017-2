@@ -67,9 +67,10 @@ class Simulacao(object):
                 self.__somatorioPessoasFilaEspera2PorTempo += tempo * (self.__fila2.numeroDePessoasNaFila() - 1)
 
     def adicionarEvento (self, cliente, evento, fila, momento):
-        print "%f: Cliente %d (%d) %s na fila %d" % (momento, cliente.getID(), cliente.getIndiceDaCor(), evento, fila)
+        #print "%f: Cliente %d (%d) %s na fila %d" % (momento, cliente.getID(), cliente.getIndiceDaCor(), evento, fila)
         
         ENt = (self.__somatorioPessoasFila1PorTempo + self.__somatorioPessoasFila2PorTempo)/momento
+        print "%f" % (ENt)
 
         if len(self.__eventosDaVariancia1) < self.__quantidadeDeEventosPorVariancia:
             self.__eventosDaVariancia1.append(ENt)
@@ -100,8 +101,6 @@ class Simulacao(object):
                         variancia2 += (self.__eventosDaVariancia2[indiceEvento] - media2)**2
                     variancia1 /= (self.__quantidadeDeEventosPorVariancia - 1)
                     variancia2 /= (self.__quantidadeDeEventosPorVariancia - 1)
-
-                    print "%f Variancias: %.10f - %.10f" % (momento, variancia1, variancia2)
 
                     if abs(variancia1 - variancia2) < self.__diferencaAceitavelDasVariancias:
                         self.__faseTransienteFinalizada = True
