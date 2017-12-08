@@ -12,6 +12,8 @@ class Simulacao(object):
         self.__mi = 1
         self.__lambd = 0.3
         self.__numero_de_clientes = 100000
+        self.__diferencaAceitavelDasVariancias = 0.0000002
+        self.__numero_de_clientes_por_fase = 1000
         
         self.__agendador = Agendador()
         
@@ -21,6 +23,8 @@ class Simulacao(object):
         
         self.__tempoAtual = 0.0
         self.__indice_cliente_atual = 0
+        self.__indice_primeiro_cliente_nao_transiente = 0
+        self.__faseTransienteFinalizada = False
 
         ### Codigo dos principais eventos da simulacao:
         # 0: Evento chegada de Cliente na Fila 1
@@ -41,7 +45,7 @@ class Simulacao(object):
         self.__somatorioPessoasFila2PorTempo = 0
         self.__somatorioPessoasFilaEspera2PorTempo = 0
 
-        self.__quantidadeDeEventosPorVariancia = 100
+        self.__quantidadeDeEventosPorVariancia = 1000
         self.__eventosDaVariancia1 = []
         self.__duracaoEventosDaVariancia1 = []
         self.__eventosDaVariancia2 = []
@@ -63,48 +67,63 @@ class Simulacao(object):
                 self.__somatorioPessoasFilaEspera2PorTempo += tempo * (self.__fila2.numeroDePessoasNaFila() - 1)
 
     def adicionarEvento (self, cliente, evento, fila, momento):
-        #print "%f: Cliente %d %s na fila %d" % (momento, cliente.getID(), evento, fila)
-
-        ENt = (self.__somatorioPessoasFila1PorTempo + self.__somatorioPessoasFila2PorTempo)
+        print "%f: Cliente %d (%d) %s na fila %d" % (momento, cliente.getID(), cliente.getIndiceDaCor(), evento, fila)
+        
+        ENt = (self.__somatorioPessoasFila1PorTempo + self.__somatorioPessoasFila2PorTempo)/momento
 
         if len(self.__eventosDaVariancia1) < self.__quantidadeDeEventosPorVariancia:
             self.__eventosDaVariancia1.append(ENt)
             self.__duracaoEventosDaVariancia1.append(momento)
 
-        else if len(self.__eventosDaVariancia2) < self.__quantidadeDeEventosPorVariancia:
-            self.__eventosDaVariancia2.append(ENt)
-            self.__duracaoEventosDaVariancia2.append(momento)
+        else: 
+            if len(self.__eventosDaVariancia2) < self.__quantidadeDeEventosPorVariancia:
+                self.__eventosDaVariancia2.append(ENt)
+                self.__duracaoEventosDaVariancia2.append(momento)
 
-            if len(self.__eventosDaVariancia2) == self.__quantidadeDeEventosPorVariancia:
-                media1 = 0
-                media2 = 0
-                duracao1 = 0
-                duracao2 = 0
-                for indiceEvento in range(self.__quantidadeDeEventosPorVariancia):
-                    media1 += self.__eventosDaVariancia1[indiceEvento]*self.__duracaoEventosDaVariancia1[indiceEvento]
-                    media2 += self.__eventosDaVariancia2[indiceEvento]*self.__duracaoEventosDaVariancia2[indiceEvento]
-                    duracao1 += self.__duracaoEventosDaVariancia1[indiceEvento]
-                    duracao2 += self.__duracaoEventosDaVariancia2[indiceEvento]
-                media1 /= duracao1
-                media2 /= duracao2
-                
-                variancia1 = 0
-                variancia2 = 0
-                for indiceEvento in range(self.__quantidadeDeEventosPorVariancia):
-                    variancia1 += (self.__eventosDaVariancia1[indiceEvento] - media1)**2
-                    variancia2 += (self.__eventosDaVariancia2[indiceEvento] - media2)**2
-                variancia1 /= (self.__quantidadeDeEventosPorVariancia - 1)
-                variancia2 /= (self.__quantidadeDeEventosPorVariancia - 1)
-                desvioPadrao1 = math.sqrt(variancia1)
-                desvioPadrao2 = math.sqrt(variancia2)
+                if len(self.__eventosDaVariancia2) == self.__quantidadeDeEventosPorVariancia:
+                    media1 = 0
+                    media2 = 0
+                    duracao1 = 0
+                    duracao2 = 0
+                    for indiceEvento in range(self.__quantidadeDeEventosPorVariancia):
+                        media1 += self.__eventosDaVariancia1[indiceEvento]*self.__duracaoEventosDaVariancia1[indiceEvento]
+                        media2 += self.__eventosDaVariancia2[indiceEvento]*self.__duracaoEventosDaVariancia2[indiceEvento]
+                        duracao1 += self.__duracaoEventosDaVariancia1[indiceEvento]
+                        duracao2 += self.__duracaoEventosDaVariancia2[indiceEvento]
+                    media1 /= duracao1
+                    media2 /= duracao2
+                    
+                    variancia1 = 0
+                    variancia2 = 0
+                    for indiceEvento in range(self.__quantidadeDeEventosPorVariancia):
+                        variancia1 += (self.__eventosDaVariancia1[indiceEvento] - media1)**2
+                        variancia2 += (self.__eventosDaVariancia2[indiceEvento] - media2)**2
+                    variancia1 /= (self.__quantidadeDeEventosPorVariancia - 1)
+                    variancia2 /= (self.__quantidadeDeEventosPorVariancia - 1)
 
-                # E preciso calcular o Intervalo de Confianca entre as duas variancias
-        
+                    print "%f Variancias: %.10f - %.10f" % (momento, variancia1, variancia2)
+
+                    if abs(variancia1 - variancia2) < self.__diferencaAceitavelDasVariancias:
+                        self.__faseTransienteFinalizada = True
+                    else:
+                        self.__eventosDaVariancia1 = self.__eventosDaVariancia2
+                        self.__duracaoEventosDaVariancia1 = self.__duracaoEventosDaVariancia2
+                        self.__eventosDaVariancia2 = []
+                        self.__duracaoEventosDaVariancia2 = []
+
         return
 
     def clienteEntraNaFila1 (self):
         self.__indice_cliente_atual += 1
-        cliente = Cliente(self.__indice_cliente_atual, self.__tempoAtual)
+        if self.__faseTransienteFinalizada == True and self.__indice_primeiro_cliente_nao_transiente == 0:
+            self.__indice_primeiro_cliente_nao_transiente = self.__indice_cliente_atual
+
+        if self.__indice_primeiro_cliente_nao_transiente == 0:
+            corDoCliente = -1
+        else:
+            corDoCliente = (self.__indice_cliente_atual - self.__indice_primeiro_cliente_nao_transiente)/self.__numero_de_clientes_por_fase
+
+        cliente = Cliente(self.__indice_cliente_atual, self.__tempoAtual, corDoCliente)
         
         self.__clientes.append(cliente)
         self.__fila1.adicionarClienteAFila(cliente)

@@ -3,10 +3,10 @@
 
 class Cliente(object):
 
-    def __init__(self, id, tempoChegadaNoSistema):
+    def __init__(self, id, tempoChegadaNoSistema, indiceDaCor):
         self.__id = id
 
-        self.__cor = '#000000'
+        self.__indiceDaCor = indiceDaCor
 
         self.__tempoChegadaFila1 = tempoChegadaNoSistema
         self.__tempoChegadaServico1 = 0.0
@@ -20,9 +20,6 @@ class Cliente(object):
     ##############
     ## Setters
     ##############
-    def setCor(self, cor):
-        self.__cor = cor
-
     def setTempoChegadaServico1(self, tempo):
         self.__tempoChegadaServico1 = tempo
 
@@ -47,8 +44,8 @@ class Cliente(object):
     def getID(self):
         return self.__id
 
-    def getCor(self, cor):
-        return self.__cor
+    def getIndiceDaCor(self):
+        return self.__indiceDaCor
     
     def getTempoChegadaFila1(self):
         return self.__tempoChegadaFila1
