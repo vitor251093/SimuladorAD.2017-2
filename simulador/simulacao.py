@@ -1,4 +1,5 @@
 from controllers.agendador import *
+from controllers.calculadora_ic import *
 from models.cliente import *
 from models.fila import *
 import random
@@ -40,6 +41,10 @@ class Simulacao(object):
         self.__timerFimDeServicoClienteFila2 = -1
 
         ### Atributos usados para calculos estatisticos
+        self.__pessoasFila1PorTempo = []
+        self.__pessoasFilaEspera1PorTempo = []
+        self.__pessoasFila2PorTempo = []
+        self.__pessoasFilaEspera2PorTempo = []
         self.__somatorioPessoasFila1PorTempo = 0
         self.__somatorioPessoasFilaEspera1PorTempo = 0
         self.__somatorioPessoasFila2PorTempo = 0
@@ -54,17 +59,26 @@ class Simulacao(object):
     """ Esse metodo apenas fica responsavel por relizar os somatorios
         para calculo do numero medio de pessoas nas duas filas. """
     def agregarEmSomatorioPessoasPorTempo (self, tempo):
+        self.__pessoasFila1PorTempo.append(self.__fila1.numeroDePessoasNaFila())
+        self.__pessoasFila2PorTempo.append(self.__fila2.numeroDePessoasNaFila())
         self.__somatorioPessoasFila1PorTempo += tempo * (self.__fila1.numeroDePessoasNaFila())
         self.__somatorioPessoasFila2PorTempo += tempo * (self.__fila2.numeroDePessoasNaFila())
 
         if self.__fila1.numeroDePessoasNaFila() > 0:
+            self.__pessoasFilaEspera1PorTempo.append(self.__fila1.numeroDePessoasNaFila() - 1)
             self.__somatorioPessoasFilaEspera1PorTempo += tempo * (self.__fila1.numeroDePessoasNaFila() - 1)
+        else:
+            self.__pessoasFilaEspera1PorTempo.append(0)
 
         if self.__fila1.numeroDePessoasNaFila() > 0:
+            self.__pessoasFilaEspera2PorTempo.append(self.__fila2.numeroDePessoasNaFila())
             self.__somatorioPessoasFilaEspera2PorTempo += tempo * (self.__fila2.numeroDePessoasNaFila())
         else:
             if self.__fila2.numeroDePessoasNaFila() > 0:
+                self.__pessoasFilaEspera2PorTempo.append(self.__fila2.numeroDePessoasNaFila() - 1)
                 self.__somatorioPessoasFilaEspera2PorTempo += tempo * (self.__fila2.numeroDePessoasNaFila() - 1)
+            else: 
+                self.__pessoasFilaEspera2PorTempo.append(0)
 
     def adicionarEvento (self, cliente, evento, fila, momento):
         #print "%f: Cliente %d (%d) %s na fila %d" % (momento, cliente.getID(), cliente.getIndiceDaCor(), evento, fila)
@@ -325,11 +339,19 @@ class Simulacao(object):
 
 
         # Calculo de estatisticas da simulacao
+        clientesT1 = []
+        clientesW1 = []
+        clientesT2 = []
+        clientesW2 = []
         somatorioT1 = 0.0
         somatorioW1 = 0.0
         somatorioT2 = 0.0
         somatorioW2 = 0.0
         for cliente in self.__clientes:
+            clientesT1.append(cliente.getTempoTotalFila1())
+            clientesW1.append(cliente.getTempoEsperaFila1())
+            clientesT2.append(cliente.getTempoTotalFila2())
+            clientesW2.append(cliente.getTempoEsperaFila2())
             somatorioT1 += cliente.getTempoTotalFila1()
             somatorioW1 += cliente.getTempoEsperaFila1()
             somatorioT2 += cliente.getTempoTotalFila2()
@@ -339,26 +361,46 @@ class Simulacao(object):
         ET2 = somatorioT2/len(self.__clientes)
         EW2 = somatorioW2/len(self.__clientes)
 
+        clientesVW1 = []
+        clientesVW2 = []
         somatorioVW1 = 0.0
         somatorioVW2 = 0.0
         for cliente in self.__clientes:
+            clientesVW1.append(cliente.getVarianciaTempoEsperaFila1(EW1))
+            clientesVW2.append(cliente.getVarianciaTempoEsperaFila2(EW2))
             somatorioVW1 += cliente.getVarianciaTempoEsperaFila1(EW1)
             somatorioVW2 += cliente.getVarianciaTempoEsperaFila2(EW2)
         EVW1 = somatorioVW1/len(self.__clientes)
         EVW2 = somatorioVW2/len(self.__clientes)
 
+        EN1  = self.__somatorioPessoasFila1PorTempo / self.__tempoAtual
+        ENq1 = self.__somatorioPessoasFilaEspera1PorTempo / self.__tempoAtual
+        EN2  = self.__somatorioPessoasFila2PorTempo / self.__tempoAtual
+        ENq2 = self.__somatorioPessoasFilaEspera2PorTempo / self.__tempoAtual
 
         # Impressao dos resultados das estatisticas
         print "E[T1]:  %f" % (ET1)
         print "E[W1]:  %f" % (EW1)
         print "V(W1):  %f" % (EVW1)
-        print "E[N1]:  %f" % (self.__somatorioPessoasFila1PorTempo / self.__tempoAtual)
-        print "E[Nq1]: %f" % (self.__somatorioPessoasFilaEspera1PorTempo / self.__tempoAtual)
+        print "E[N1]:  %f" % (EN1)
+        print "E[Nq1]: %f" % (ENq1)
         print "E[T2]:  %f" % (ET2)
         print "E[W2]:  %f" % (EW2)
         print "V(W2):  %f" % (EVW2)
-        print "E[N2]:  %f" % (self.__somatorioPessoasFila2PorTempo / self.__tempoAtual)
-        print "E[Nq2]: %f" % (self.__somatorioPessoasFilaEspera2PorTempo / self.__tempoAtual)
+        print "E[N2]:  %f" % (EN2)
+        print "E[Nq2]: %f" % (ENq2)
+
+        calculadora = CalculadoraIC()
+        print "IC E[T1]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesT1))
+        print "IC E[W1]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesW1))
+        print "IC V(W1):  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesVW1))
+        print "IC E[N1]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFila1PorTempo, EN1))
+        print "IC E[Nq1]: %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFilaEspera1PorTempo, ENq1))
+        print "IC E[T2]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesT2))
+        print "IC E[W2]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesW2))
+        print "IC V(W2):  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesVW2))
+        print "IC E[N2]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFila2PorTempo, EN2))
+        print "IC E[Nq2]: %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFilaEspera2PorTempo, ENq2))
 
 
 def randomNumber():
