@@ -36,6 +36,12 @@ Instale o Python-Matplotlib:
 sudo apt-get install python-matplotlib
 ```
 
+Faça o download do projeto no link:
+
+```
+https://github.com/vitor251093/SimuladorAD.2017-2.git
+```
+
 Entre na pasta do projeto e execute:
 
 ```
@@ -43,9 +49,8 @@ pip install -r requirements.txt
 ```
 
 
-## Running the tests
+## Rodando o programa
 
-Explain how to run the automated tests for this system
 
 ### Break down into end to end tests
 
