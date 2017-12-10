@@ -4,16 +4,24 @@ from models.fila import *
 from models.fase import *
 import random
 import math
+import sys
+import getopt
+import os
+from time import gmtime, strftime
 
 """ Principal classe do simulador. Simulacao possui o metodo run que inicia todo o processo. """
 
 class Simulacao(object):
 
     def __init__(self):
-        self.__mi = 1
-        self.__lambd = 0.3
-        self.__numero_de_clientes = 100000
-        self.__numero_de_clientes_por_fase = 1000
+        self.__mi = None
+        self.__lambd = None
+        self.__numero_de_clientes_por_fase = None
+        self.__numero_de_rodadas = None
+
+        self.__seedsDistance = 0.01
+        self.__seedsList = []
+        self.__output_file = None
         
         self.__agendador = Agendador()
         
@@ -74,11 +82,16 @@ class Simulacao(object):
     def adicionarEvento (self, cliente, evento, fila, momento):
         #print "%f: Cliente %d (%d) %s na fila %d" % (momento, cliente.getID(), cliente.getIndiceDaCor(), evento, fila)
         
+        ENt = self.__fase.getEsperancaDeN(momento)
+
+        if self.__output_file == None:
+            print "%f,%d" % (ENt, cliente.getIndiceDaCor())
+        else:
+            self.__output_file.write("%f,%d\n" % (ENt, cliente.getIndiceDaCor()))
+        
         if self.__faseTransienteFinalizada == True:
             return
 
-        ENt = self.__fase.getEsperancaDeN(momento)
-        
         if len(self.__eventosDaVariancia1) < self.__quantidadeDeEventosPorVariancia:
             self.__eventosDaVariancia1.append(ENt)
             self.__duracaoEventosDaVariancia1.append(momento)
@@ -118,6 +131,18 @@ class Simulacao(object):
                         self.__duracaoEventosDaVariancia2 = []
 
 
+    def randomNumber(self):
+        return random.random()
+
+    def randomNumberDistantFrom(self, numbersList, distance):
+        newNumber = 0
+        while newNumber == 0:
+            newNumber = self.randomNumber()
+            for number in numbersList:
+                if abs(newNumber - number) < distance:
+                    newNumber = 0
+        return newNumber
+
     def clienteEntraNaFila1 (self):
         self.__indice_cliente_atual += 1
         if self.__faseTransienteFinalizada == True and self.__indice_primeiro_cliente_nao_transiente == 0:
@@ -129,6 +154,9 @@ class Simulacao(object):
             indiceDaFase = (self.__indice_cliente_atual - self.__indice_primeiro_cliente_nao_transiente)/self.__numero_de_clientes_por_fase
             if indiceDaFase > self.__fase.getID():
                 self.__fase.calcularEstatisticas(self.__tempoAtual - self.__timerChegadaClienteFila1)
+
+                newSeed = self.randomNumberDistantFrom(self.__seedsList, self.__seedsDistance)
+                self.__agendador.configurarSemente(newSeed)
                 self.__fase = Fase(indiceDaFase, self.__tempoAtual)
             corDoCliente = indiceDaFase
 
@@ -149,7 +177,11 @@ class Simulacao(object):
             self.__timerFimDeServicoClienteFila1 = self.__agendador.agendarTempoDeServicoFila1(self.__mi)
             cliente.setTempoServico1(self.__timerFimDeServicoClienteFila1)
 
-        if self.__numero_de_clientes - self.__indice_cliente_atual == 0:
+        if self.__faseTransienteFinalizada == False:
+            self.__timerChegadaClienteFila1 = self.__agendador.agendarChegadaFila1(self.__lambd)
+            return
+
+        if self.__fase.getID() + 1 == self.__numero_de_rodadas and self.__fase.quantidadeDeClientes() == self.__numero_de_clientes_por_fase:
             self.__timerChegadaClienteFila1 = -1
         else:    
             self.__timerChegadaClienteFila1 = self.__agendador.agendarChegadaFila1(self.__lambd)
@@ -321,7 +353,18 @@ class Simulacao(object):
         
 
     """ Principal metodo da classe Simulacao. Aqui inicio toda a simulacao. """
-    def executarSimulacao(self, seed):
+    def executarSimulacao(self, seed, lambdaValue, miValue, numeroDeClientesPorRodada, rodadas, hasOutputFile, testeDeCorretude):
+        self.__lambd = lambdaValue
+        self.__mi = miValue
+        self.__numero_de_clientes_por_fase = numeroDeClientesPorRodada
+        self.__numero_de_rodadas = rodadas
+
+        if hasOutputFile == True:
+            dir_path = os.path.dirname(os.path.abspath(__file__))
+            file_path = "/../plot/%s.csv" % (strftime("%Y-%m-%d %H.%M.%S", gmtime()))
+            self.__output_file = open(dir_path + file_path, "w")
+
+        self.__agendador.setTesteDeCorretude(testeDeCorretude)
         self.__agendador.configurarSemente(seed)
 
         # Comeco agendando a chegada do primeiro Cliente no sistema.
@@ -330,8 +373,11 @@ class Simulacao(object):
 
 
         # Loop principal da simulacao
-        while self.__numero_de_clientes > self.__indice_cliente_atual or self.__fila1.numeroDePessoasNaFila() > 0 or self.__fila2.numeroDePessoasNaFila() > 0:
+        while self.__numero_de_rodadas > self.__fase.getID() + 1 or self.__numero_de_clientes_por_fase > self.__fase.quantidadeDeClientes() or self.__fila1.numeroDePessoasNaFila() > 0 or self.__fila2.numeroDePessoasNaFila() > 0:
             self.executarProximoEvento()
+
+        if hasOutputFile == True:
+            self.__output_file.close() 
 
         self.__fase.calcularEstatisticas(self.__tempoAtual)
         
@@ -349,13 +395,70 @@ def randomNumberDistantFrom(numbersList, distance):
                 newNumber = 0
     return newNumber
 
-if __name__ == "__main__":
-    numberOfSimulations = 1
+def printHelp():
+    print 'Uso: simulacao.py [args]'
+    print 'Opcoes e argumentos:'
+    print '-l, --lambda\t\t\tEspecifica o valor de lambda (Padrao: 0.3)'
+    print '-m, --mi\t\t\tEspecifica o valor de mi (Padrao: 1.0)'
+    print '-c, --clientes-por-rodada\tEspecifica o numero de clientes por rodada (Padrao: 20000)'
+    print '-r, --rodadas\t\t\tEspecifica o numero de rodadas (Padrao: 100)'
+    print '-s, --simulacoes\t\tEspecifica o numero de simulacoes (Padrao: 1)'
+    print '-o, --csv-output\t\tDefine que a saida deve ser em um arquivo csv no diretorio \'plot\''
+    print '-t, --teste\t\t\tExecuta o programa em modo de Teste de Corretude'
+
+def safeInt(key, stringValue):
+    try:
+        return int(stringValue)
+    except ValueError:
+        print "ERRO: A chave \"%s\" aceita apenas valores inteiros (int)." % (key)
+        sys.exit(2)
+
+def safeFloat(key, stringValue):
+    try:
+        return float(stringValue)
+    except ValueError:
+        print "ERRO: A chave \"%s\" aceita apenas valores de ponto flutuante (float)." % (key)
+        sys.exit(2)
+
+def main(argv):
+    lambdaValue = 0.3
+    miValue = 1
+    numeroDeClientesPorRodada = 20000
+    rodadas = 100
+    simulacoes = 1
+    outputFile = False
+    testeDeCorretude = False
+    try:
+        opts, args = getopt.getopt(argv,"hotl:m:c:r:s",["help","csv-output","teste","lambda=","mi=","clientes-por-rodada=","rodadas=","simulacoes="])
+    except getopt.GetoptError:
+        printHelp()
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            printHelp()
+            sys.exit()
+        elif opt in ("-l", "--lambda"):
+            lambdaValue = safeFloat("lambda",arg)
+        elif opt in ("-m", "--mi"):
+            miValue = safeFloat("mi",arg)
+        elif opt in ("-c", "--clientes-por-rodada"):
+            numeroDeClientesPorRodada = safeInt("clientes por rodada",arg)
+        elif opt in ("-r", "--rodadas"):
+            rodadas = safeInt("rodadas", arg)
+        elif opt in ("-s", "--simulacoes"):
+            simulacoes = safeInt("simulacoes", arg)
+        elif opt in ("-o", "--csv-output"):
+            outputFile = True
+        elif opt in ("-t", "--teste"):
+            testeDeCorretude = True
+    
     seedsDistance = 0.01
+    seedsList = []
 
-    numbersList = []
+    for i in range(simulacoes):
+        newSeed = randomNumberDistantFrom(seedsList, seedsDistance)
+        Simulacao().executarSimulacao(newSeed, lambdaValue, miValue, numeroDeClientesPorRodada, rodadas, outputFile, testeDeCorretude)
+        seedsList.append(newSeed)
 
-    for i in range(numberOfSimulations):
-        newSeed = randomNumberDistantFrom(numbersList, seedsDistance)
-        Simulacao().executarSimulacao(newSeed)
-        numbersList.append(newSeed)
+if __name__ == "__main__":
+    main(sys.argv[1:])

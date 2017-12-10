@@ -23,8 +23,13 @@ class Fase(object):
     def getID(self):
         return self.__id
 
+    def quantidadeDeClientes(self):
+        return len(self.__clientes)
+
     def getEsperancaDeN(self, tempoAtual):
-        return (self.__somatorioPessoasFila1PorTempo + self.__somatorioPessoasFila2PorTempo)/tempoAtual
+        if tempoAtual == self.__tempoInicial:
+            return 0
+        return (self.__somatorioPessoasFila1PorTempo + self.__somatorioPessoasFila2PorTempo)/(tempoAtual-self.__tempoInicial)
 
     def inserirNumeroDeClientesPorTempoNaFila1(self, numeroDeClientes, tempo):
         self.__pessoasFila1PorTempo.append(numeroDeClientes)
@@ -94,25 +99,25 @@ class Fase(object):
         ENq2 = self.__somatorioPessoasFilaEspera2PorTempo / (tempoAtual - self.__tempoInicial)
 
         # Impressao dos resultados das estatisticas
-        print "E[T1]:  %f" % (ET1)
-        print "E[W1]:  %f" % (EW1)
-        print "V(W1):  %f" % (EVW1)
-        print "E[N1]:  %f" % (EN1)
-        print "E[Nq1]: %f" % (ENq1)
-        print "E[T2]:  %f" % (ET2)
-        print "E[W2]:  %f" % (EW2)
-        print "V(W2):  %f" % (EVW2)
-        print "E[N2]:  %f" % (EN2)
-        print "E[Nq2]: %f" % (ENq2)
+        #print "E[T1]:  %f" % (ET1)
+        #print "E[W1]:  %f" % (EW1)
+        #print "V(W1):  %f" % (EVW1)
+        #print "E[N1]:  %f" % (EN1)
+        #print "E[Nq1]: %f" % (ENq1)
+        #print "E[T2]:  %f" % (ET2)
+        #print "E[W2]:  %f" % (EW2)
+        #print "V(W2):  %f" % (EVW2)
+        #print "E[N2]:  %f" % (EN2)
+        #print "E[Nq2]: %f" % (ENq2)
 
-        calculadora = CalculadoraIC()
-        print "IC E[T1]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesT1))
-        print "IC E[W1]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesW1))
-        print "IC V(W1):  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesVW1))
-        print "IC E[N1]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFila1PorTempo, EN1))
-        print "IC E[Nq1]: %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFilaEspera1PorTempo, ENq1))
-        print "IC E[T2]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesT2))
-        print "IC E[W2]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesW2))
-        print "IC V(W2):  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesVW2))
-        print "IC E[N2]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFila2PorTempo, EN2))
-        print "IC E[Nq2]: %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFilaEspera2PorTempo, ENq2))
+        #calculadora = CalculadoraIC()
+        #print "IC E[T1]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesT1))
+        #print "IC E[W1]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesW1))
+        #print "IC V(W1):  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesVW1))
+        #print "IC E[N1]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFila1PorTempo, EN1))
+        #print "IC E[Nq1]: %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFilaEspera1PorTempo, ENq1))
+        #print "IC E[T2]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesT2))
+        #print "IC E[W2]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesW2))
+        #print "IC V(W2):  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesVW2))
+        #print "IC E[N2]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFila2PorTempo, EN2))
+        #print "IC E[Nq2]: %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFilaEspera2PorTempo, ENq2))
