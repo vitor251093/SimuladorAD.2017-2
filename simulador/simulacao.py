@@ -22,6 +22,7 @@ class Simulacao(object):
         self.__seedsDistance = 0.01
         self.__seedsList = []
         self.__output_file = None
+        self.__output_type = None
         
         self.__agendador = Agendador()
         
@@ -78,16 +79,19 @@ class Simulacao(object):
             else: 
                 self.__fase.inserirNumeroDeClientesPorTempoNaFilaEspera2(0, tempo)
 
+    def imprimir(self, texto):
+        if self.__output_file == None:
+            print texto
+        else:
+            self.__output_file.write("%s\n" % (texto))
 
     def adicionarEvento (self, cliente, evento, fila, momento):
         #print "%f: Cliente %d (%d) %s na fila %d" % (momento, cliente.getID(), cliente.getIndiceDaCor(), evento, fila)
         
         ENt = self.__fase.getEsperancaDeN(momento)
 
-        if self.__output_file == None:
-            print "%f,%d" % (ENt, cliente.getIndiceDaCor())
-        else:
-            self.__output_file.write("%f,%d\n" % (ENt, cliente.getIndiceDaCor()))
+        if self.__output_type == 1:
+            self.imprimir("%f,%d" % (ENt, cliente.getIndiceDaCor()))
         
         if self.__faseTransienteFinalizada == True:
             return
@@ -153,7 +157,8 @@ class Simulacao(object):
         else:
             indiceDaFase = (self.__indice_cliente_atual - self.__indice_primeiro_cliente_nao_transiente)/self.__numero_de_clientes_por_fase
             if indiceDaFase > self.__fase.getID():
-                self.__fase.calcularEstatisticas(self.__tempoAtual - self.__timerChegadaClienteFila1)
+                if self.__output_type == 0:
+                    self.__fase.calcularEstatisticas(self.__tempoAtual - self.__timerChegadaClienteFila1)
 
                 newSeed = self.randomNumberDistantFrom(self.__seedsList, self.__seedsDistance)
                 self.__agendador.configurarSemente(newSeed)
@@ -353,12 +358,13 @@ class Simulacao(object):
         
 
     """ Principal metodo da classe Simulacao. Aqui inicio toda a simulacao. """
-    def executarSimulacao(self, seed, lambdaValue, miValue, numeroDeClientesPorRodada, rodadas, hasOutputFile, testeDeCorretude):
+    def executarSimulacao(self, seed, lambdaValue, miValue, numeroDeClientesPorRodada, rodadas, hasOutputFile, variavelDeSaida, testeDeCorretude):
         self.__lambd = lambdaValue
         self.__mi = miValue
         self.__numero_de_clientes_por_fase = numeroDeClientesPorRodada
         self.__numero_de_rodadas = rodadas
 
+        self.__output_type = variavelDeSaida
         if hasOutputFile == True:
             dir_path = os.path.dirname(os.path.abspath(__file__))
             file_path = "/../plot/%s.csv" % (strftime("%Y-%m-%d %H.%M.%S", gmtime()))
@@ -379,7 +385,8 @@ class Simulacao(object):
         if hasOutputFile == True:
             self.__output_file.close() 
 
-        self.__fase.calcularEstatisticas(self.__tempoAtual)
+        if self.__output_type == 0:
+            self.__fase.calcularEstatisticas(self.__tempoAtual)
         
 
 
@@ -403,8 +410,11 @@ def printHelp():
     print '-c, --clientes-por-rodada\tEspecifica o numero de clientes por rodada (Padrao: 20000)'
     print '-r, --rodadas\t\t\tEspecifica o numero de rodadas (Padrao: 100)'
     print '-s, --simulacoes\t\tEspecifica o numero de simulacoes (Padrao: 1)'
-    print '-o, --csv-output\t\tDefine que a saida deve ser em um arquivo csv no diretorio \'plot\''
     print '-t, --teste\t\t\tExecuta o programa em modo de Teste de Corretude'
+    print '-o, --csv-output\t\tDefine que a saida deve ser em um arquivo csv no diretorio \'plot\''
+    print '-v, --variavel-de-saida\t\tDefine o que sera calculado e impresso pelo programa'
+    print '   0:  Imprime as estatisticas de cada fase/rodada (nao parseavel pelo \'plot.py\')'
+    print '   1:  Imprime o E[N] durante cada evento'
 
 def safeInt(key, stringValue):
     try:
@@ -428,8 +438,9 @@ def main(argv):
     simulacoes = 1
     outputFile = False
     testeDeCorretude = False
+    variavelDeSaida = 1
     try:
-        opts, args = getopt.getopt(argv,"hotl:m:c:r:s",["help","csv-output","teste","lambda=","mi=","clientes-por-rodada=","rodadas=","simulacoes="])
+        opts, args = getopt.getopt(argv,"hotl:m:c:r:s:v:",["help","csv-output","teste","lambda=","mi=","clientes-por-rodada=","rodadas=","simulacoes=","variavel-de-saida="])
     except getopt.GetoptError:
         printHelp()
         sys.exit(2)
@@ -449,6 +460,8 @@ def main(argv):
             simulacoes = safeInt("simulacoes", arg)
         elif opt in ("-o", "--csv-output"):
             outputFile = True
+        elif opt in ("-v", "--variavel-de-saida"):
+            variavelDeSaida = safeInt("variavel de saida", arg)
         elif opt in ("-t", "--teste"):
             testeDeCorretude = True
     
@@ -457,7 +470,7 @@ def main(argv):
 
     for i in range(simulacoes):
         newSeed = randomNumberDistantFrom(seedsList, seedsDistance)
-        Simulacao().executarSimulacao(newSeed, lambdaValue, miValue, numeroDeClientesPorRodada, rodadas, outputFile, testeDeCorretude)
+        Simulacao().executarSimulacao(newSeed, lambdaValue, miValue, numeroDeClientesPorRodada, rodadas, outputFile, variavelDeSaida, testeDeCorretude)
         seedsList.append(newSeed)
 
 if __name__ == "__main__":
