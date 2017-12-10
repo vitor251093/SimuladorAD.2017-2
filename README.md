@@ -1,36 +1,47 @@
-# Simulador de Filas M/G/1
+# Simulador filas M/G/1
 
-Esse simulador foi criado para mostrar e comprovar o funcionamento de duas filas FCFS com prioridade da Fila 1 sobre a Fila 2
 
-## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+## Inicio
 
-### Prerequisites
+Essas instruções te ajudarão a rodar o nosso código na sua máquina local.
 
-What things you need to install the software and how to install them
+### Pre-requisitos
+
+* Esse código foi feito para rodar diretamente no Ubuntu-16.04 ou superior. Ele pode ser rodado no Windows, mas é necessário modificações em algumas partes.
+
+* Python 2.7.12 ou superior.
 
 ```
 Give examples
 ```
 
-### Installing
+### Instalando
 
-A step by step series of examples that tell you have to get a development env running
-
-Say what the step will be
+Primeiro atualize o Ubuntu:
 
 ```
-Give the example
+sudo apt-get update && sudo apt-get -y upgrade
 ```
 
-And repeat
+Agora instale o pip:
 
 ```
-until finished
+sudo apt-get install python-pip
 ```
 
-End with an example of getting some data out of the system or using it for a little demo
+Instale o Python-Matplotlib:
+
+```
+sudo apt-get install python-matplotlib
+```
+
+Entre na pasta do projeto e execute:
+
+```
+pip install -r requirements.txt
+```
+
 
 ## Running the tests
 
