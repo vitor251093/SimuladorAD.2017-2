@@ -10,7 +10,7 @@ Essas instruções te ajudarão a rodar o nosso código na sua máquina local.
 
 * Esse código foi feito para rodar diretamente no Ubuntu-16.04 ou superior. Ele pode ser rodado no Windows, mas é necessário modificações em algumas partes.
 
-* Python 2.7.12 ou superior.
+* Python 2.7
 
 ```
 Give examples
@@ -51,10 +51,7 @@ pip install -r requirements.txt
 
 ## Rodando o programa
 
-
-### Break down into end to end tests
-
-Explain what these tests test and why
+Exemplo para rodar
 
 ```
 Give an example
