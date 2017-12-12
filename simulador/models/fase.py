@@ -32,6 +32,70 @@ class Fase(object):
             return 0
         return (self.__somatorioPessoasFila1PorTempo + self.__somatorioPessoasFila2PorTempo)/(tempoAtual-self.__tempoInicial)
 
+    def getEsperancaDeN1(self, tempoAtual):
+        if tempoAtual == self.__tempoInicial:
+            return 0
+        return (self.__somatorioPessoasFila1PorTempo)/(tempoAtual-self.__tempoInicial)
+
+    def getEsperancaDeN2(self, tempoAtual):
+        if tempoAtual == self.__tempoInicial:
+            return 0
+        return (self.__somatorioPessoasFila2PorTempo)/(tempoAtual-self.__tempoInicial)
+
+    def getEsperancaDeNq1(self, tempoAtual):
+        if tempoAtual == self.__tempoInicial:
+            return 0
+        return (self.__somatorioPessoasFilaEspera1PorTempo)/(tempoAtual-self.__tempoInicial)
+
+    def getEsperancaDeNq2(self, tempoAtual):
+        if tempoAtual == self.__tempoInicial:
+            return 0
+        return (self.__somatorioPessoasFilaEspera2PorTempo)/(tempoAtual-self.__tempoInicial)
+
+    def getEsperancaDeT1(self):
+        somatorioT1 = 0.0
+        for cliente in self.__clientes:
+            if cliente.getTempoChegadaFila2() != 0:
+                somatorioT1 += cliente.getTempoTotalFila1()
+        return somatorioT1/len(self.__clientes)
+
+    def getEsperancaDeT2(self):
+        somatorioT2 = 0.0
+        for cliente in self.__clientes:
+            if cliente.getTempoTerminoServico2() != 0:
+                somatorioT2 += cliente.getTempoTotalFila2()
+        return somatorioT2/len(self.__clientes)
+
+    def getEsperancaDeW1(self):
+        somatorioW1 = 0.0
+        for cliente in self.__clientes:
+            if cliente.getTempoServico1() != 0:
+                somatorioW1 += cliente.getTempoEsperaFila1()
+        return somatorioW1/len(self.__clientes)
+
+    def getEsperancaDeW2(self):
+        somatorioW2 = 0.0
+        for cliente in self.__clientes:
+            if cliente.getTempoTerminoServico2() != 0:
+                somatorioW2 += cliente.getTempoEsperaFila2()
+        return somatorioW2/len(self.__clientes)
+
+    def getVarianciaDeW1(self):
+        EW1 = self.getEsperancaDeW1()
+        somatorioVW1 = 0.0
+        for cliente in self.__clientes:
+            if cliente.getTempoServico1() != 0:
+                somatorioVW1 += cliente.getVarianciaTempoEsperaFila1(EW1)
+        return somatorioVW1/len(self.__clientes)
+
+    def getVarianciaDeW2(self):
+        EW2 = self.getEsperancaDeW2()
+        somatorioVW2 = 0.0
+        for cliente in self.__clientes:
+            if cliente.getTempoTerminoServico2() != 0:
+                somatorioVW2 += cliente.getVarianciaTempoEsperaFila2(EW2)
+        return somatorioVW2/len(self.__clientes)
+
     def inserirNumeroDeClientesPorTempoNaFila1(self, numeroDeClientes, tempo):
         self.__pessoasFila1PorTempo.append(numeroDeClientes)
         self.__somatorioPessoasFila1PorTempo += tempo * numeroDeClientes

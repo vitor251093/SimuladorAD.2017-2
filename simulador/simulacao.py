@@ -87,7 +87,27 @@ class Simulacao(object):
 
         if self.__output_type == 1:
             self.__view.imprimir("%f,%d" % (ENt, cliente.getIndiceDaCor()))
-        
+        if self.__output_type == 2:
+            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeN1(momento), cliente.getIndiceDaCor()))
+        if self.__output_type == 3:
+            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeN2(momento), cliente.getIndiceDaCor()))
+        if self.__output_type == 4:
+            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeNq1(momento), cliente.getIndiceDaCor()))
+        if self.__output_type == 5:
+            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeNq2(momento), cliente.getIndiceDaCor()))
+        if self.__output_type == 6:
+            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeT1(), cliente.getIndiceDaCor()))
+        if self.__output_type == 7:
+            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeT2(), cliente.getIndiceDaCor()))
+        if self.__output_type == 8:
+            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeW1(), cliente.getIndiceDaCor()))
+        if self.__output_type == 9:
+            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeW2(), cliente.getIndiceDaCor()))
+        if self.__output_type == 10:
+            self.__view.imprimir("%f,%d" % (self.__fase.getVarianciaDeW1(), cliente.getIndiceDaCor()))
+        if self.__output_type == 11:
+            self.__view.imprimir("%f,%d" % (self.__fase.getVarianciaDeW2(), cliente.getIndiceDaCor()))
+
         if self.__faseTransienteFinalizada == True:
             return
 
@@ -453,6 +473,16 @@ def printHelp():
     print '-v, --variavel-de-saida\t\tDefine o que sera calculado e impresso pelo programa'
     print '   0:  Imprime as estatisticas de cada fase/rodada (nao parseavel pelo \'plot.py\')'
     print '   1:  Imprime o E[N] durante cada evento'
+    print '   2:  Imprime o E[N1] durante cada evento'
+    print '   3:  Imprime o E[N2] durante cada evento'
+    print '   4:  Imprime o E[Nq1] durante cada evento'
+    print '   5:  Imprime o E[Nq2] durante cada evento'
+    print '   6:  Imprime o E[T1] durante cada evento'
+    print '   7:  Imprime o E[T2] durante cada evento'
+    print '   8:  Imprime o E[W1] durante cada evento'
+    print '   9:  Imprime o E[W2] durante cada evento'
+    print '  10:  Imprime o V(W1) durante cada evento'
+    print '  11:  Imprime o V(W2) durante cada evento'
 
 def safeInt(key, stringValue):
     # Converte uma string passada como valor de um parametro para um numero inteiro. 
