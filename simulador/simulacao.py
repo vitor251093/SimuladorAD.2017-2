@@ -86,27 +86,27 @@ class Simulacao(object):
         ENt = self.__fase.getEsperancaDeN(momento)
 
         if self.__output_type == 1:
-            self.__view.imprimir("%f,%d" % (ENt, cliente.getIndiceDaCor()))
+            self.__view.imprimir("%f,%d" % (ENt, self.__fase.getID()))
         if self.__output_type == 2:
-            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeN1(momento), cliente.getIndiceDaCor()))
+            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeN1(momento), self.__fase.getID()))
         if self.__output_type == 3:
-            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeN2(momento), cliente.getIndiceDaCor()))
+            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeN2(momento), self.__fase.getID()))
         if self.__output_type == 4:
-            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeNq1(momento), cliente.getIndiceDaCor()))
+            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeNq1(momento), self.__fase.getID()))
         if self.__output_type == 5:
-            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeNq2(momento), cliente.getIndiceDaCor()))
+            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeNq2(momento), self.__fase.getID()))
         if self.__output_type == 6:
-            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeT1(), cliente.getIndiceDaCor()))
+            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeT1(), self.__fase.getID()))
         if self.__output_type == 7:
-            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeT2(), cliente.getIndiceDaCor()))
+            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeT2(), self.__fase.getID()))
         if self.__output_type == 8:
-            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeW1(), cliente.getIndiceDaCor()))
+            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeW1(), self.__fase.getID()))
         if self.__output_type == 9:
-            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeW2(), cliente.getIndiceDaCor()))
+            self.__view.imprimir("%f,%d" % (self.__fase.getEsperancaDeW2(), self.__fase.getID()))
         if self.__output_type == 10:
-            self.__view.imprimir("%f,%d" % (self.__fase.getVarianciaDeW1(), cliente.getIndiceDaCor()))
+            self.__view.imprimir("%f,%d" % (self.__fase.getVarianciaDeW1(), self.__fase.getID()))
         if self.__output_type == 11:
-            self.__view.imprimir("%f,%d" % (self.__fase.getVarianciaDeW2(), cliente.getIndiceDaCor()))
+            self.__view.imprimir("%f,%d" % (self.__fase.getVarianciaDeW2(), self.__fase.getID()))
 
         if self.__faseTransienteFinalizada == True:
             return
@@ -354,7 +354,7 @@ class Simulacao(object):
         # no sistema ou o fim de servico de um cliente da fila 1 devera acontecer, dependendo
         # de qual dos dois ocorrera em um tempo menor.
         if timerValido3 == False:
-            return self.__timerChegadaClienteFila1Indice if self.__timerChegadaClienteFila1 <= self.__timerFimDeServicoClienteFila1 else self.__timerFimDeServicoClienteFila1Indice
+            return self.__timerChegadaClienteFila1Indice if self.__timerChegadaClienteFila1 < self.__timerFimDeServicoClienteFila1 else self.__timerFimDeServicoClienteFila1Indice
 
         
         # A proxima condicao remete ao caso em que os tres eventos estao agendados 
@@ -363,7 +363,7 @@ class Simulacao(object):
         # Eh criada uma lista com o tempo que falta ate que cada um dos tres eventos 
         # principais agendados ocorra, ordenados em eventos 0, 1 e 2, posicionados
         # nos respectivos indices da lista
-        lista = [self.__timerChegadaClienteFila1, self.__timerFimDeServicoClienteFila1, self.__timerFimDeServicoClienteFila2]
+        lista = [self.__timerFimDeServicoClienteFila1, self.__timerFimDeServicoClienteFila2, self.__timerChegadaClienteFila1]
 
         # Com min(lista), retornamos o menor dos tres tempos presentes na lista;
         # com lista.index(), retornamos o indice desse tempo na lista, conseguindo assim 
@@ -430,7 +430,7 @@ class Simulacao(object):
 
 
         # Loop principal da simulacao
-        while self.__numero_de_rodadas > self.__fase.getID() + 1 or self.__numero_de_clientes_por_fase > self.__fase.quantidadeDeClientes() or self.__fila1.numeroDePessoasNaFila() > 0 or self.__fila2.numeroDePessoasNaFila() > 0:
+        while self.__numero_de_rodadas > self.__fase.getID() + 1 or self.__numero_de_clientes_por_fase > self.__fase.quantidadeDeClientes():
             self.executarProximoEvento()
 
         if self.__output_type == 0:
@@ -510,7 +510,7 @@ def safeFloat(key, stringValue):
 
 def main(argv):
     lambdaValue = 0.3
-    miValue = 1
+    miValue = 1.0
     numeroDeClientesPorRodada = 20000
     rodadas = 100
     simulacoes = 1
