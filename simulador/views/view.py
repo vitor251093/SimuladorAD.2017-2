@@ -1,3 +1,5 @@
+import os
+from time import gmtime, strftime
 
 class View(object):
     def __init__(self):
@@ -6,7 +8,7 @@ class View(object):
     def setImprimirEmArquivo(self, imprimirEmArquivo):
         if imprimirEmArquivo == True:
             dir_path = os.path.dirname(os.path.abspath(__file__))
-            file_path = "/../plot/%s.csv" % (strftime("%Y-%m-%d %H.%M.%S", gmtime()))
+            file_path = "/../../plot/%s.csv" % (strftime("%Y-%m-%d %H.%M.%S", gmtime()))
             self.__output_file = open(dir_path + file_path, "w")
         else:
             self.__output_file = None

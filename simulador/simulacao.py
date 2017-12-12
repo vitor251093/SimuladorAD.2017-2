@@ -7,8 +7,6 @@ import random
 import math
 import sys
 import getopt
-import os
-from time import gmtime, strftime
 
 """ Principal classe do simulador. Simulacao possui o metodo executarSimulacao que eh 
     chamado pelo main, o qual pode ser encontrado no fim deste arquivo. """
