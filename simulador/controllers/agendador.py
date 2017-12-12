@@ -19,18 +19,18 @@ class Agendador(object):
 
     def agendarChegadaFila1(self, lambd):
         if self.__testeDeCorretude == True:
-            return lambd
+            return 2.0/lambd
 
         return random.expovariate(lambd)
 
     def agendarTempoDeServicoFila1(self, mi):
         if self.__testeDeCorretude == True:
-            return mi
+            return 2.0/mi
 
         return random.expovariate(mi)
 
     def agendarTempoDeServicoFila2(self, mi):
         if self.__testeDeCorretude == True:
-            return mi
+            return 2.0/mi
 
         return random.expovariate(mi)
