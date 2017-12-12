@@ -26,17 +26,21 @@ class Plot(object):
             print "ERRO: O nome do arquivo .csv que sera plotado deve ser passado como argumento. Ele deve estar no mesmo diretorio do plot.py, ou entao o caminho do .csv inteiro devera ser passado."
             return
 
-        N = numpy.loadtxt(sys.argv[1], unpack=True, delimiter=',')
+        caminhoDoArquivo = sys.argv[1] 
+        N = numpy.loadtxt(caminhoDoArquivo, unpack=True, delimiter=',')
         
-        for indiceVetor in range(len(N[0])-1):
-            valor1 = N[0][indiceVetor]
-            valor2 = N[0][indiceVetor+1]
-            cor    = int(N[1][indiceVetor])
-            pyplot.plot([indiceVetor, indiceVetor+1], [valor1, valor2], self.corParaIndice(cor))
+        comCor = True
+        if len(sys.argv) >= 3 and (sys.argv[2] == "-cl" or sys.argv[2] == "--colorless"):
+            comCor = False
 
-        #pyplot.title('')
-        #pyplot.ylabel('')
-        #pyplot.xlabel('')
+        if comCor == True:
+            for indiceVetor in range(len(N[0])-1):
+                valor1 = N[0][indiceVetor]
+                valor2 = N[0][indiceVetor+1]
+                cor    = int(N[1][indiceVetor])
+                pyplot.plot([indiceVetor, indiceVetor+1], [valor1, valor2], self.corParaIndice(cor))
+        else:
+            pyplot.plot(N[0])
 
         pyplot.show()
 
