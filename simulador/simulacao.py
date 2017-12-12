@@ -2,6 +2,7 @@ from controllers.agendador import *
 from models.cliente import *
 from models.fila import *
 from models.fase import *
+from views.view import *
 import random
 import math
 import sys
@@ -9,7 +10,8 @@ import getopt
 import os
 from time import gmtime, strftime
 
-""" Principal classe do simulador. Simulacao possui o metodo run que inicia todo o processo. """
+""" Principal classe do simulador. Simulacao possui o metodo executarSimulacao que eh 
+    chamado pelo main, o qual pode ser encontrado no fim deste arquivo. """
 
 class Simulacao(object):
 
@@ -21,7 +23,7 @@ class Simulacao(object):
 
         self.__seedsDistance = 0.01
         self.__seedsList = []
-        self.__output_file = None
+        self.__view = None
         self.__output_type = None
         
         self.__agendador = Agendador()
@@ -79,22 +81,23 @@ class Simulacao(object):
             else: 
                 self.__fase.inserirNumeroDeClientesPorTempoNaFilaEspera2(0, tempo)
 
-    def imprimir(self, texto):
-        if self.__output_file == None:
-            print texto
-        else:
-            self.__output_file.write("%s\n" % (texto))
-
     def adicionarEvento (self, cliente, evento, fila, momento):
         #print "%f: Cliente %d (%d) %s na fila %d" % (momento, cliente.getID(), cliente.getIndiceDaCor(), evento, fila)
         
         ENt = self.__fase.getEsperancaDeN(momento)
 
         if self.__output_type == 1:
-            self.imprimir("%f,%d" % (ENt, cliente.getIndiceDaCor()))
+            self.__view.imprimir("%f,%d" % (ENt, cliente.getIndiceDaCor()))
         
         if self.__faseTransienteFinalizada == True:
             return
+
+
+        # Daqui para baixo, essa funcao realiza o calculo que define quando
+        # a fase transiente acaba. Comparando a variancia das ultimas 1000
+        # amostras de E[N] com a variancia das 1000 amostras anteriores,
+        # o fim da fase transiente eh caracterizado quando se encontram
+        # duas variancias que variam apenas em 0,0000002.
 
         if len(self.__eventosDaVariancia1) < self.__quantidadeDeEventosPorVariancia:
             self.__eventosDaVariancia1.append(ENt)
@@ -136,9 +139,12 @@ class Simulacao(object):
 
 
     def randomNumber(self):
+        # Retorna um numero aleatorio entre 0.0 e 1.0
         return random.random()
 
     def randomNumberDistantFrom(self, numbersList, distance):
+        # Retorna um numero aleatorio entre 0.0 e 1.0 que seja distante de todos
+        # os numeros de `numbersList` por pelo menos o valor de `distance`.
         newNumber = 0
         while newNumber == 0:
             newNumber = self.randomNumber()
@@ -146,6 +152,17 @@ class Simulacao(object):
                 if abs(newNumber - number) < distance:
                     newNumber = 0
         return newNumber
+
+
+    """Evento: Cliente entra na fila 1
+       Com essa funcao realizamos todas as acoes que ocorrem em decorrencia da
+       entrada de um cliente na fila 1, que sao: se nao houver ninguem na fila 1,
+       levar esse cliente diretamente ao servico, e interrompe qualquer cliente
+       da fila 2 que possa estar sendo atendido.
+        
+       Eh aqui tambem que decidimos qual sera a cor de um cliente. O fim de uma fase/rodada
+       tambem ocorre aqui, entao aqui tambem ocorrem os calculos estatisticos que sao 
+       chamados ao fim de uma fase/rodada."""
 
     def clienteEntraNaFila1 (self):
         self.__indice_cliente_atual += 1
@@ -158,7 +175,7 @@ class Simulacao(object):
             indiceDaFase = (self.__indice_cliente_atual - self.__indice_primeiro_cliente_nao_transiente)/self.__numero_de_clientes_por_fase
             if indiceDaFase > self.__fase.getID():
                 if self.__output_type == 0:
-                    self.__fase.calcularEstatisticas(self.__tempoAtual - self.__timerChegadaClienteFila1)
+                    self.__fase.calcularEstatisticas(self.__tempoAtual - self.__timerChegadaClienteFila1, self.__view)
 
                 newSeed = self.randomNumberDistantFrom(self.__seedsList, self.__seedsDistance)
                 self.__agendador.configurarSemente(newSeed)
@@ -192,6 +209,13 @@ class Simulacao(object):
             self.__timerChegadaClienteFila1 = self.__agendador.agendarChegadaFila1(self.__lambd)
 
 
+    """Evento: Fim de servico na fila 1
+       Com essa funcao realizamos todas as acoes que ocorrem em decorrencia do 
+       fim de um servico na fila 1, que sao: tirar o cliente que concluiu o servico 
+       da fila 1 e coloca-lo no final da fila 2, e colocar em servico o proximo 
+       cliente da fila 1 se houver algum (se nao houver, colocar em servico o 
+       proximo cliente da fila 2, se houver algum)."""
+
     def clienteTerminaServicoNaFila1(self):
         cliente = self.__fila1.retirarClienteEmAtendimento()
         self.adicionarEvento(cliente, "terminou o atendimento", self.__fila1.getID(), self.__tempoAtual)
@@ -208,12 +232,20 @@ class Simulacao(object):
         else:
             self.__timerFimDeServicoClienteFila1 = -1
             proximoCliente = self.__fila2.clienteEmAtendimento()
-            if proximoCliente.getTempoDecorridoServico2() > 0: # Cliente que foi interrompido
+            if proximoCliente.getTempoDecorridoServico2() > 0: 
+                # Cliente da fila 2 que foi interrompido anteriormente retorna
                 self.__timerFimDeServicoClienteFila2 = proximoCliente.getTempoServico2() - proximoCliente.getTempoDecorridoServico2()
                 
-            else: # Proximo cliente da fila
+            else: 
+                # Cliente da fila 2 eh atendido pela primeira vez
                 self.__timerFimDeServicoClienteFila2 = self.__agendador.agendarTempoDeServicoFila2(self.__mi)
                 proximoCliente.setTempoServico2(self.__timerFimDeServicoClienteFila2)
+
+
+    """Evento: Fim de servico na fila 2
+       Com essa funcao realizamos todas as acoes que ocorrem em decorrencia do 
+       fim de um servico na fila 2, que sao: tirar o cliente que concluiu o servico 
+       da fila 2, e colocar em servico o proximo cliente da fila 2 (se houver algum)."""
 
     def clienteTerminaServicoNaFila2(self):
         cliente = self.__fila2.retirarClienteEmAtendimento()
@@ -227,6 +259,7 @@ class Simulacao(object):
             proximoCliente.setTempoServico2(self.__timerFimDeServicoClienteFila2)
         else:
             self.__timerFimDeServicoClienteFila2 = -1
+
 
     """ eventoDeDuracaoMinima() ira cuidar da verificacao de qual evento ocorre antes.
         Temos 3 eventos principais: tempo de chegada na fila 1, fim de servico 1 e
@@ -357,7 +390,7 @@ class Simulacao(object):
             self.clienteTerminaServicoNaFila2()
         
 
-    """ Principal metodo da classe Simulacao. Aqui inicio toda a simulacao. """
+    """ Principal metodo da classe Simulacao. Aqui a simulacao eh iniciada. """
     def executarSimulacao(self, seed, lambdaValue, miValue, numeroDeClientesPorRodada, rodadas, hasOutputFile, variavelDeSaida, testeDeCorretude):
         self.__lambd = lambdaValue
         self.__mi = miValue
@@ -365,16 +398,14 @@ class Simulacao(object):
         self.__numero_de_rodadas = rodadas
 
         self.__output_type = variavelDeSaida
-        if hasOutputFile == True:
-            dir_path = os.path.dirname(os.path.abspath(__file__))
-            file_path = "/../plot/%s.csv" % (strftime("%Y-%m-%d %H.%M.%S", gmtime()))
-            self.__output_file = open(dir_path + file_path, "w")
+        self.__view = View()
+        self.__view.setImprimirEmArquivo(hasOutputFile)
 
         self.__agendador.setTesteDeCorretude(testeDeCorretude)
         self.__agendador.configurarSemente(seed)
 
-        # Comeco agendando a chegada do primeiro Cliente no sistema.
-        # A partir dela os proximo eventos sao gerados no loop principal da simulacao (mais abaixo).
+        # Comecamos agendando a chegada do primeiro Cliente no sistema.
+        # A partir dela os proximos eventos sao gerados no loop principal da simulacao (mais abaixo).
         self.__timerChegadaClienteFila1 = self.__agendador.agendarChegadaFila1(self.__lambd)
 
 
@@ -383,17 +414,22 @@ class Simulacao(object):
             self.executarProximoEvento()
 
         if hasOutputFile == True:
-            self.__output_file.close() 
+            self.__view.gravarArquivoDeSaida()
 
         if self.__output_type == 0:
-            self.__fase.calcularEstatisticas(self.__tempoAtual)
+            self.__fase.calcularEstatisticas(self.__tempoAtual, self.__view)
         
 
+"""randomNumber, randomNumberDistantFrom, printHelp, safeInt e safeFloat sao funcoes
+   de apoio para a funcao main. Cada uma sera explicada com mais detalhes abaixo."""
 
 def randomNumber():
+    # Retorna um numero aleatorio entre 0.0 e 1.0
     return random.random()
 
 def randomNumberDistantFrom(numbersList, distance):
+    # Retorna um numero aleatorio entre 0.0 e 1.0 que seja distante de todos
+    # os numeros de `numbersList` por pelo menos o valor de `distance`.
     newNumber = 0
     while newNumber == 0:
         newNumber = randomNumber()
@@ -403,6 +439,8 @@ def randomNumberDistantFrom(numbersList, distance):
     return newNumber
 
 def printHelp():
+    # Imprime a ajuda do programa, que eh mostrada quando os parametros sao passados
+    # incorretamente ou quando ela eh chamada diretamente via -h ou --help.
     print 'Uso: simulacao.py [args]'
     print 'Opcoes e argumentos:'
     print '-l, --lambda\t\t\tEspecifica o valor de lambda (Padrao: 0.3)'
@@ -417,6 +455,9 @@ def printHelp():
     print '   1:  Imprime o E[N] durante cada evento'
 
 def safeInt(key, stringValue):
+    # Converte uma string passada como valor de um parametro para um numero inteiro. 
+    # Se a string nao for um numero inteiro, o programa encerra com uma mensagem
+    # de erro, alertando que o parametro esta incorreto.
     try:
         return int(stringValue)
     except ValueError:
@@ -424,11 +465,18 @@ def safeInt(key, stringValue):
         sys.exit(2)
 
 def safeFloat(key, stringValue):
+    # Converte uma string passada como valor de um parametro para um numero float. 
+    # Se a string nao for um numero float, o programa encerra com uma mensagem
+    # de erro, alertando que o parametro esta incorreto.
     try:
         return float(stringValue)
     except ValueError:
         print "ERRO: A chave \"%s\" aceita apenas valores de ponto flutuante (float)." % (key)
         sys.exit(2)
+
+
+"""Funcao principal do programa. Interpreta as flags passadas como parametros para configurar 
+   e executar o simulador."""
 
 def main(argv):
     lambdaValue = 0.3
@@ -439,6 +487,7 @@ def main(argv):
     outputFile = False
     testeDeCorretude = False
     variavelDeSaida = 1
+
     try:
         opts, args = getopt.getopt(argv,"hotl:m:c:r:s:v:",["help","csv-output","teste","lambda=","mi=","clientes-por-rodada=","rodadas=","simulacoes=","variavel-de-saida="])
     except getopt.GetoptError:
@@ -474,4 +523,5 @@ def main(argv):
         seedsList.append(newSeed)
 
 if __name__ == "__main__":
+    # Chama a funcao main repassando os argumentos usados na execucao do programa.
     main(sys.argv[1:])

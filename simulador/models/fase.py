@@ -1,4 +1,5 @@
 from controllers.calculadora_ic import *
+from views.view import *
 
 class Fase(object):
     def __init__(self, id, tempoInicial):
@@ -47,7 +48,8 @@ class Fase(object):
         self.__pessoasFilaEspera2PorTempo.append(numeroDeClientes)
         self.__somatorioPessoasFilaEspera2PorTempo += tempo * numeroDeClientes
 
-    def calcularEstatisticas(self, tempoAtual):
+
+    def calcularEstatisticas(self, tempoAtual, view):
         # Calculo de estatisticas da simulacao
         clientesT1 = []
         clientesW1 = []
@@ -99,30 +101,30 @@ class Fase(object):
         ENq2 = self.__somatorioPessoasFilaEspera2PorTempo / (tempoAtual - self.__tempoInicial)
 
         if self.__id == -1:
-            print "Fase Transiente:"
+            view.imprimir("Fase Transiente:")
         else:
-            print "\nFase Recorrente %d:" % (self.__id + 1)
+            view.imprimir("\nFase Recorrente %d:" % (self.__id + 1))
 
         # Impressao dos resultados das estatisticas
-        print "E[T1]:  %f" % (ET1)
-        print "E[W1]:  %f" % (EW1)
-        print "V(W1):  %f" % (EVW1)
-        print "E[N1]:  %f" % (EN1)
-        print "E[Nq1]: %f" % (ENq1)
-        print "E[T2]:  %f" % (ET2)
-        print "E[W2]:  %f" % (EW2)
-        print "V(W2):  %f" % (EVW2)
-        print "E[N2]:  %f" % (EN2)
-        print "E[Nq2]: %f" % (ENq2)
+        view.imprimir("E[T1]:  %f" % (ET1))
+        view.imprimir("E[W1]:  %f" % (EW1))
+        view.imprimir("V(W1):  %f" % (EVW1))
+        view.imprimir("E[N1]:  %f" % (EN1))
+        view.imprimir("E[Nq1]: %f" % (ENq1))
+        view.imprimir("E[T2]:  %f" % (ET2))
+        view.imprimir("E[W2]:  %f" % (EW2))
+        view.imprimir("V(W2):  %f" % (EVW2))
+        view.imprimir("E[N2]:  %f" % (EN2))
+        view.imprimir("E[Nq2]: %f" % (ENq2))
 
-        calculadora = CalculadoraIC()
-        print "IC E[T1]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesT1))
-        print "IC E[W1]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesW1))
-        print "IC V(W1):  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesVW1))
-        print "IC E[N1]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFila1PorTempo, EN1))
-        print "IC E[Nq1]: %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFilaEspera1PorTempo, ENq1))
-        print "IC E[T2]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesT2))
-        print "IC E[W2]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesW2))
-        print "IC V(W2):  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesVW2))
-        print "IC E[N2]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFila2PorTempo, EN2))
-        print "IC E[Nq2]: %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFilaEspera2PorTempo, ENq2))
+        calculadora = CalculadoraIC(0.95)
+        view.imprimir("IC E[T1]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesT1)))
+        view.imprimir("IC E[W1]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesW1)))
+        view.imprimir("IC V(W1):  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesVW1)))
+        view.imprimir("IC E[N1]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFila1PorTempo, EN1)))
+        view.imprimir("IC E[Nq1]: %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFilaEspera1PorTempo, ENq1)))
+        view.imprimir("IC E[T2]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesT2)))
+        view.imprimir("IC E[W2]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesW2)))
+        view.imprimir("IC V(W2):  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesVW2)))
+        view.imprimir("IC E[N2]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFila2PorTempo, EN2)))
+        view.imprimir("IC E[Nq2]: %f - %f" % (calculadora.intervaloDeConfiancaDeAmostrasComMedia(self.__pessoasFilaEspera2PorTempo, ENq2)))

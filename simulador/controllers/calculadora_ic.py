@@ -3,8 +3,8 @@ import scipy.stats
 
 class CalculadoraIC(object):
 
-    def __init__(self):
-        self.__intervaloDeConfianca = 0.95
+    def __init__(self, intervaloDeConfianca):
+        self.__intervaloDeConfianca = intervaloDeConfianca
 
     def tabelaTStudent(self, grausDeLiberdade):
         return scipy.stats.t.ppf(1 - self.__intervaloDeConfianca, grausDeLiberdade)
