@@ -18,6 +18,7 @@ class Simulacao(object):
         self.__lambd = None
         self.__numero_de_clientes_por_fase = None
         self.__numero_de_rodadas = None
+        self.__intervaloDeConfianca = None
 
         self.__seedsDistance = 0.01
         self.__seedsList = []
@@ -173,7 +174,7 @@ class Simulacao(object):
             indiceDaFase = (self.__indice_cliente_atual - self.__indice_primeiro_cliente_nao_transiente)/self.__numero_de_clientes_por_fase
             if indiceDaFase > self.__fase.getID():
                 if self.__output_type == 0:
-                    self.__fase.calcularEstatisticas(self.__tempoAtual - self.__timerChegadaClienteFila1, self.__view)
+                    self.__fase.calcularEstatisticas(self.__tempoAtual - self.__timerChegadaClienteFila1, self.__view, self.__intervaloDeConfianca)
 
                 newSeed = self.randomNumberDistantFrom(self.__seedsList, self.__seedsDistance)
                 self.__agendador.configurarSemente(newSeed)
@@ -389,11 +390,12 @@ class Simulacao(object):
         
 
     """ Principal metodo da classe Simulacao. Aqui a simulacao eh iniciada. """
-    def executarSimulacao(self, seed, lambdaValue, miValue, numeroDeClientesPorRodada, rodadas, hasOutputFile, variavelDeSaida, testeDeCorretude):
+    def executarSimulacao(self, seed, lambdaValue, miValue, numeroDeClientesPorRodada, rodadas, hasOutputFile, variavelDeSaida, testeDeCorretude, intervaloDeConfianca):
         self.__lambd = lambdaValue
         self.__mi = miValue
         self.__numero_de_clientes_por_fase = numeroDeClientesPorRodada
         self.__numero_de_rodadas = rodadas
+        self.__intervaloDeConfianca = intervaloDeConfianca
 
         self.__output_type = variavelDeSaida
         self.__view = View()
@@ -411,11 +413,11 @@ class Simulacao(object):
         while self.__numero_de_rodadas > self.__fase.getID() + 1 or self.__numero_de_clientes_por_fase > self.__fase.quantidadeDeClientes() or self.__fila1.numeroDePessoasNaFila() > 0 or self.__fila2.numeroDePessoasNaFila() > 0:
             self.executarProximoEvento()
 
+        if self.__output_type == 0:
+            self.__fase.calcularEstatisticas(self.__tempoAtual, self.__view, self.__intervaloDeConfianca)
+
         if hasOutputFile == True:
             self.__view.gravarArquivoDeSaida()
-
-        if self.__output_type == 0:
-            self.__fase.calcularEstatisticas(self.__tempoAtual, self.__view)
         
 
 """randomNumber, randomNumberDistantFrom, printHelp, safeInt e safeFloat sao funcoes
@@ -485,9 +487,10 @@ def main(argv):
     outputFile = False
     testeDeCorretude = False
     variavelDeSaida = 1
+    intervaloDeConfianca = 0.95
 
     try:
-        opts, args = getopt.getopt(argv,"hotl:m:c:r:s:v:",["help","csv-output","teste","lambda=","mi=","clientes-por-rodada=","rodadas=","simulacoes=","variavel-de-saida="])
+        opts, args = getopt.getopt(argv,"hotl:m:t:c:r:s:v:",["help","csv-output","teste","lambda=","mi=","confianca=","clientes-por-rodada=","rodadas=","simulacoes=","variavel-de-saida="])
     except getopt.GetoptError:
         printHelp()
         sys.exit(2)
@@ -499,6 +502,8 @@ def main(argv):
             lambdaValue = safeFloat("lambda",arg)
         elif opt in ("-m", "--mi"):
             miValue = safeFloat("mi",arg)
+        elif opt in ("-i", "--confianca"):
+            intervaloDeConfianca = safeFloat("intervalo de confianca",arg)
         elif opt in ("-c", "--clientes-por-rodada"):
             numeroDeClientesPorRodada = safeInt("clientes por rodada",arg)
         elif opt in ("-r", "--rodadas"):
@@ -517,7 +522,7 @@ def main(argv):
 
     for i in range(simulacoes):
         newSeed = randomNumberDistantFrom(seedsList, seedsDistance)
-        Simulacao().executarSimulacao(newSeed, lambdaValue, miValue, numeroDeClientesPorRodada, rodadas, outputFile, variavelDeSaida, testeDeCorretude)
+        Simulacao().executarSimulacao(newSeed, lambdaValue, miValue, numeroDeClientesPorRodada, rodadas, outputFile, variavelDeSaida, testeDeCorretude, intervaloDeConfianca)
         seedsList.append(newSeed)
 
 if __name__ == "__main__":

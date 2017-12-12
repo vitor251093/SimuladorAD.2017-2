@@ -49,7 +49,7 @@ class Fase(object):
         self.__somatorioPessoasFilaEspera2PorTempo += tempo * numeroDeClientes
 
 
-    def calcularEstatisticas(self, tempoAtual, view):
+    def calcularEstatisticas(self, tempoAtual, view, intervaloDeConfianca):
         # Calculo de estatisticas da simulacao
         clientesT1 = []
         clientesW1 = []
@@ -117,7 +117,7 @@ class Fase(object):
         view.imprimir("E[N2]:  %f" % (EN2))
         view.imprimir("E[Nq2]: %f" % (ENq2))
 
-        calculadora = CalculadoraIC(0.95)
+        calculadora = CalculadoraIC(intervaloDeConfianca)
         view.imprimir("IC E[T1]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesT1)))
         view.imprimir("IC E[W1]:  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesW1)))
         view.imprimir("IC V(W1):  %f - %f" % (calculadora.intervaloDeConfiancaDeAmostras(clientesVW1)))
